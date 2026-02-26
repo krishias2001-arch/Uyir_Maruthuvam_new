@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam/main_screen.dart';
+import 'package:uyir_maruthuvam_new/auth_services/Welcome_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "Uyir Maruthuvam",
-      home: MainScreen(),
+      home: WelcomeScreen(),
     );
   }
 }

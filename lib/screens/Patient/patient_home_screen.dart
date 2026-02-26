@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'docter_screen.dart';
+import '../Doctor/docter_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final List<String> catNames = ["Dental", "Heart", "Eye", "Brain", "Ear"];
@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundImage: AssetImage("images/doctor1.jpg"),
+                        backgroundImage: AssetImage("images/welcome.png"),
                       ),
                       SizedBox(width: 15),
                       Text(

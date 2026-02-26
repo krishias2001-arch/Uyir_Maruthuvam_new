@@ -1,19 +1,26 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam/schedule_screen.dart';
-import 'home_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_settings_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_messages_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_home_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_schedule_screen.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class DoctorMainScreen extends StatefulWidget {
+  const DoctorMainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<DoctorMainScreen> createState() => _DoctorMainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _DoctorMainScreenState extends State<DoctorMainScreen> {
   int _selectedIndex = 0;
 
-  final _screens = [HomeScreen(), Container(), ScheduleScreen(), Container()];
+  final List<Widget> _screens = [
+    DoctorHomeScreen(),
+    DoctorMessagesScreen(),
+    DoctorScheduleScreen(),
+    DoctorSettingsScreen(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,14 +41,11 @@ class _MainScreenState extends State<MainScreen> {
             _selectedIndex = index;
           });
         },
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Home"),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Messages"),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.chat_bubble_text_fill),
-            label: "Messages",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
+            icon: Icon(Icons.calendar_today),
             label: "Schedule",
           ),
           BottomNavigationBarItem(
