@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uyir_maruthuvam_new/screens/role_selection_screen.dart';
 import 'custom_button.dart';
 import 'custom_field.dart';
 
@@ -13,7 +14,9 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FD),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 300),
+
           child: Padding(
             padding: EdgeInsets.all(24),
             child: Column(
@@ -78,7 +81,17 @@ class LoginScreen extends StatelessWidget {
                 FadeInUp(
                   duration: Duration(milliseconds: 600),
                   delay: Duration(milliseconds: 400),
-                  child: CustomButton(onPressed: () {}, text: 'Log In'),
+                  child: CustomButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RoleSelectionScreen(),
+                        ),
+                      );
+                    },
+                    text: 'Log In',
+                  ),
                 ),
                 SizedBox(height: 24),
                 FadeIn(
@@ -117,7 +130,10 @@ class LoginScreen extends StatelessWidget {
                               height: 1,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Colors.transparent, Color(0xFFE0E0)],
+                                  colors: [
+                                    Colors.transparent,
+                                    Color(0xFFE0E0E0),
+                                  ],
                                 ),
                               ),
                             ),
@@ -137,7 +153,10 @@ class LoginScreen extends StatelessWidget {
                               height: 1,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Colors.transparent, Color(0xFFE0E0)],
+                                  colors: [
+                                    Colors.transparent,
+                                    Color(0x00ffe0e0),
+                                  ],
                                 ),
                               ),
                             ),

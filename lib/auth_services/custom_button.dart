@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/screens/role_selection_screen.dart';
 
 class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -22,19 +21,20 @@ class CustomButton extends StatelessWidget {
           BoxShadow(
             color: Color(0xFF4A154B).withOpacity(0.3),
             blurRadius: 20,
-            offset: Offset(0, 10),
+            offset: Offset(2, 10),
           ),
         ],
       ),
       child: ElevatedButton(
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const RoleSelectionScreen(),
-            ),
-          );
-        },
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
         child: Text(
           text,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
