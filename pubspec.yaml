@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   material_design_icons_flutter: ^7.0.7296
   animate_do: ^4.2.0
+  table_calendar: ^3.0.9
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_settings_screen.dart';
-import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_messages_screen.dart';
-import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_home_screen.dart';
-import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_schedule_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_messages_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_home_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_schedule_screen.dart';
 
 class DoctorMainScreen extends StatefulWidget {
   const DoctorMainScreen({super.key});
@@ -18,7 +17,6 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
     DoctorHomeScreen(),
     DoctorMessagesScreen(),
     DoctorScheduleScreen(),
-    DoctorSettingsScreen(),
   ];
 
   @override
@@ -47,10 +45,6 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
             label: "Schedule",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
           ),
         ],
       ),

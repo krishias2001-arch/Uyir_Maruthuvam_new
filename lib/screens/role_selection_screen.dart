@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/screens/Doctor/Doctor_main_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_profile_setup_screen.dart';
-import 'package:uyir_maruthuvam_new/screens/Patient/patient_main_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Patient/patient_profile_setup_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {

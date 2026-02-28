@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../Patient/appointment_screen.dart';
+import '../appointment_screen.dart';
 
 class DocterScreen extends StatelessWidget {
   final List<String> imgs = [

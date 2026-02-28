@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/auth_services/Welcome_screen.dart';
+import 'package:uyir_maruthuvam_new/welcome_screen.dart';
 
 void main() {
   runApp(MyApp());

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import '../Doctor/docter_screen.dart';
+import '../bottom navigation bar/docter_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  final String username;
+
+  HomeScreen({super.key, required this.username});
   final List<String> catNames = ["Dental", "Heart", "Eye", "Brain", "Ear"];
 
   final List<Icon> catIcons = [
@@ -42,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       SizedBox(width: 15),
                       Text(
-                        "Hello, Doctor",
+                        "Hello, $username",
                         style: TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.w500,

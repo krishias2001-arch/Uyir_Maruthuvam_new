@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/screens/Patient/patient_home_screen.dart';
-import 'package:uyir_maruthuvam_new/screens/Patient/schedule_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Patient/patient_profile_screen.dart';
+import 'bottomnavigationbar/patient_home_screen.dart';
+import 'bottomnavigationbar/schedule_screen.dart';
 
 class PatientMainScreen extends StatefulWidget {
-  const PatientMainScreen({super.key});
+  final String username;
+  const PatientMainScreen({super.key, required this.username});
 
   @override
   State<PatientMainScreen> createState() => _PatientMainScreenState();
@@ -20,7 +22,7 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
     super.initState();
 
     _screens = [
-      HomeScreen(),
+      HomeScreen(username: widget.username),
       const Center(child: Text("Messages")),
       const ScheduleScreen(),
       const Center(child: Text("Settings")),
@@ -51,17 +53,55 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Home"),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.chat_bubble_text_fill),
-            label: "Messages",
+            label: "Chat",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month_outlined),
             label: "Schedule",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
-          ),
         ],
+      ),
+      appBar: AppBar(title: Text("Uyir Maruthuvam")),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text("Patient Name"),
+              accountEmail: Text("patient@email.com"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.person, size: 40, color: Colors.redAccent),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text("Profile"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PatientProfileScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text("Settings"),
+              onTap: () {
+                // Navigate to settings screen
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text("Logout"),
+              onTap: () {
+                // Logout logic
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

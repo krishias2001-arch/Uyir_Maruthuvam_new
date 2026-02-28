@@ -44,7 +44,7 @@ class _PatientProfileSetupScreenState extends State<PatientProfileSetupScreen> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<String>(
-                  value: selectedGender,
+                  initialValue: selectedGender,
                   decoration: InputDecoration(
                     labelText: "Gender",
                     border: OutlineInputBorder(
@@ -74,7 +74,9 @@ class _PatientProfileSetupScreenState extends State<PatientProfileSetupScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const PatientMainScreen(),
+                            builder: (_) => PatientMainScreen(
+                              username: nameController.text.trim(),
+                            ),
                           ),
                         );
                       }
