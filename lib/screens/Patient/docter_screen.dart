@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../appointment_screen.dart';
+import 'appointment_screen.dart';
 
 class DocterScreen extends StatelessWidget {
   final List<String> imgs = [
@@ -297,7 +297,7 @@ class DocterScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "\₹100",
+                  "₹100",
                   style: TextStyle(
                     fontSize: 20,
                     color: Colors.redAccent.withOpacity(0.8),

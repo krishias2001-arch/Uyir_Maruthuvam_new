@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import '../bottom navigation bar/docter_screen.dart';
+import '../docter_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String username;
@@ -41,7 +41,9 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundImage: AssetImage("images/welcome.png"),
+                        backgroundImage: AssetImage(
+                          "images/patient_profile.jpg",
+                        ),
                       ),
                       SizedBox(width: 15),
                       Text(

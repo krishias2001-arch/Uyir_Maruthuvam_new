@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/screens/Patient/patient_profile_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Patient/patient_storage_screen.dart';
+import 'package:uyir_maruthuvam_new/auth_services/google_auth.dart';
 import 'bottomnavigationbar/patient_home_screen.dart';
 import 'bottomnavigationbar/schedule_screen.dart';
 
@@ -25,7 +27,6 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
       HomeScreen(username: widget.username),
       const Center(child: Text("Messages")),
       const ScheduleScreen(),
-      const Center(child: Text("Settings")),
     ];
   }
 
@@ -94,10 +95,34 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text("Logout"),
+              leading: Icon(Icons.settings),
+              title: Text("Medical Records"),
               onTap: () {
-                // Logout logic
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PatientStorageScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.medical_information),
+              title: Text("Medical history"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PatientStorageScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text("Logout"),
+              onTap: () async {
+                await GoogleAuth().signOut();
               },
             ),
           ],

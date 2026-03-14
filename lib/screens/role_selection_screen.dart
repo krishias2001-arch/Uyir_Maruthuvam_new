@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/screens/Doctor/doctor_profile_setup_screen.dart';
-import 'package:uyir_maruthuvam_new/screens/Patient/patient_profile_setup_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -44,13 +44,15 @@ class RoleSelectionScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PatientProfileSetupScreen(),
-                      ),
-                    );
+                  onPressed: () async {
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user!.uid)
+                        .update({
+                      'role': 'patient'
+                    });
                   },
                   child: const Text(
                     "Continue as Patient",
@@ -72,13 +74,15 @@ class RoleSelectionScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DoctorProfileSetupScreen(),
-                      ),
-                    );
+                  onPressed: () async {
+                    final user = FirebaseAuth.instance.currentUser;
+
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user!.uid)
+                        .update({
+                      'role': 'doctor'
+                    });
                   },
                   child: const Text(
                     "Continue as Doctor",

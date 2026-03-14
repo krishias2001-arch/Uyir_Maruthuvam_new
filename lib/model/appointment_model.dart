@@ -1,10 +1,10 @@
 class Appointment {
-  String patientName;
-  int age;
-  DateTime appointmentDate;
-  String slotTime;
-  bool isPaid;
-  bool isCompleted;
+  final String patientName;
+  final int age;
+  final DateTime appointmentDate;
+  final String slotTime;
+  final bool isPaid;
+  final bool isCompleted;
 
   Appointment({
     required this.patientName,

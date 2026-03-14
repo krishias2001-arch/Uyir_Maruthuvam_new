@@ -16,7 +16,7 @@ class UpcomingSchedule extends StatelessWidget {
           ),
           SizedBox(height: 15),
           Container(
-            padding: EdgeInsets.symmetric(vertical: 5),
+            padding: EdgeInsets.symmetric(vertical: 2),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
@@ -45,7 +45,7 @@ class UpcomingSchedule extends StatelessWidget {
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: Divider(thickness: 1, height: 20),
+                    child: Divider(thickness: 1, height: 5),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -73,7 +73,7 @@ class UpcomingSchedule extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.all(5),
+                            padding: EdgeInsets.all(2),
                             decoration: BoxDecoration(
                               color: Colors.green,
                               shape: BoxShape.circle,
@@ -96,7 +96,7 @@ class UpcomingSchedule extends StatelessWidget {
                         onTap: () {},
                         child: Container(
                           width: 150,
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 5),
                           decoration: BoxDecoration(
                             color: Color(0xFFF4F6FA),
                             borderRadius: BorderRadius.circular(10),
@@ -117,7 +117,7 @@ class UpcomingSchedule extends StatelessWidget {
                         onTap: () {},
                         child: Container(
                           width: 150,
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 5),
                           decoration: BoxDecoration(
                             color: Colors.redAccent,
                             borderRadius: BorderRadius.circular(10),
@@ -146,7 +146,7 @@ class UpcomingSchedule extends StatelessWidget {
           ),
           SizedBox(height: 15),
           Container(
-            padding: EdgeInsets.symmetric(vertical: 5),
+            padding: EdgeInsets.symmetric(vertical: 2),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
@@ -175,7 +175,7 @@ class UpcomingSchedule extends StatelessWidget {
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: Divider(thickness: 1, height: 20),
+                    child: Divider(thickness: 1, height: 5),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -226,7 +226,7 @@ class UpcomingSchedule extends StatelessWidget {
                         onTap: () {},
                         child: Container(
                           width: 150,
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 5),
                           decoration: BoxDecoration(
                             color: Color(0xFFF4F6FA),
                             borderRadius: BorderRadius.circular(10),
@@ -247,7 +247,7 @@ class UpcomingSchedule extends StatelessWidget {
                         onTap: () {},
                         child: Container(
                           width: 150,
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 5),
                           decoration: BoxDecoration(
                             color: Colors.redAccent,
                             borderRadius: BorderRadius.circular(10),
@@ -276,7 +276,7 @@ class UpcomingSchedule extends StatelessWidget {
           ),
           SizedBox(height: 15),
           Container(
-            padding: EdgeInsets.symmetric(vertical: 5),
+            padding: EdgeInsets.symmetric(vertical: 2),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
@@ -305,7 +305,7 @@ class UpcomingSchedule extends StatelessWidget {
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: Divider(thickness: 1, height: 20),
+                    child: Divider(thickness: 1, height: 5),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -356,7 +356,7 @@ class UpcomingSchedule extends StatelessWidget {
                         onTap: () {},
                         child: Container(
                           width: 150,
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 2),
                           decoration: BoxDecoration(
                             color: Color(0xFFF4F6FA),
                             borderRadius: BorderRadius.circular(10),
@@ -377,7 +377,7 @@ class UpcomingSchedule extends StatelessWidget {
                         onTap: () {},
                         child: Container(
                           width: 150,
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 5),
                           decoration: BoxDecoration(
                             color: Colors.redAccent,
                             borderRadius: BorderRadius.circular(10),

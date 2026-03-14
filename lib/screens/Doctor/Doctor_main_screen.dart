@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_messages_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_home_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_schedule_screen.dart';
+import 'package:uyir_maruthuvam_new/main.dart';
 
 class DoctorMainScreen extends StatefulWidget {
   const DoctorMainScreen({super.key});
@@ -13,14 +14,18 @@ class DoctorMainScreen extends StatefulWidget {
 class _DoctorMainScreenState extends State<DoctorMainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    DoctorHomeScreen(),
-    DoctorMessagesScreen(),
-    DoctorScheduleScreen(),
-  ];
+  void _onLogout() async {
+    // Use the static restart method
+    MyApp.restartApp();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _screens = [
+      DoctorHomeScreen(onLogout: _onLogout),
+      DoctorMessagesScreen(),
+      DoctorScheduleScreen(),
+    ];
     return Scaffold(
       backgroundColor: Colors.white,
       body: _screens[_selectedIndex],

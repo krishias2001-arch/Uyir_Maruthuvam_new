@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/screens/Patient/patient_main_screen.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 class PatientProfileSetupScreen extends StatefulWidget {
   const PatientProfileSetupScreen({super.key});
 
@@ -69,18 +69,14 @@ class _PatientProfileSetupScreenState extends State<PatientProfileSetupScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PatientMainScreen(
-                              username: nameController.text.trim(),
-                            ),
-                          ),
-                        );
-                      }
-                    },
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(FirebaseAuth.instance.currentUser!.uid)
+                            .update({
+                          'profileCompleted': true,
+                        });
+                      },
                     child: const Text("Save & Continue"),
                   ),
                 ),
