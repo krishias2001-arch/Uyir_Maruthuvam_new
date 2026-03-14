@@ -1,5 +1,6 @@
 
 import 'package:animate_do/animate_do.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/screens/role_selection_screen.dart';
@@ -188,12 +189,20 @@ class LoginScreen extends StatelessWidget {
                                 ],
                                 onTap: () async {
                                   try {
-                                    await GoogleAuth().signInWithGoogle();
+                                    UserCredential? result = await GoogleAuth().signInWithGoogle();
+                                    if (result != null && context.mounted) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const RoleSelectionScreen(),
+                                        ),
+                                      );
+                                    }
                                   } catch (e) {
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text('Sign-in failed'),
+                                          content: Text('Sign-in failed: $e'),
                                         ),
                                       );
                                     }
