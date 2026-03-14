@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'appointment_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Patient/appointment_screen.dart';
 
 class DocterScreen extends StatelessWidget {
-  final List<String> imgs = [
+  final String doctorId;
+  
+  const DocterScreen({super.key, required this.doctorId});
+  
+  static const List<String> imgs = [
     "images/doctor1.jpg",
     "images/doctor2.jpg",
     "images/doctor3.jpg",
@@ -311,7 +315,7 @@ class DocterScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AppointmentScreen()),
+                  MaterialPageRoute(builder: (context) => AppointmentScreen(doctorId: doctorId)),
                 );
               },
               child: Container(

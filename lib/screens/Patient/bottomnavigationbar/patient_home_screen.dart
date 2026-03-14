@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import '../docter_screen.dart';
+import '../patient_view_docter_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String username;
@@ -216,7 +216,7 @@ class HomeScreen extends StatelessWidget {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                DocterScreen(),
+                                                DocterScreen(doctorId: 'doctor_${index + 1}'),
                                           ),
                                         );
                                       },
