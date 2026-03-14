@@ -1,0 +1,36 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "uyirmaruthuvam-d3601",
+          "appId": "1:968357194494:android:f84c439b1220b4564d93af",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "uyirmaruthuvam-d3601",
+          "configurations": {
+            "android": "1:968357194494:android:f84c439b1220b4564d93af",
+            "web": "1:968357194494:web:294cc427e26a242b4d93af"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "source": "functions"
+    }
+  ]
+}
