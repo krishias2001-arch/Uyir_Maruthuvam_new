@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/screens/payment services/payment_screen.dart';
+import 'package:uyir_maruthuvam_new/services/notification_services.dart';
 import 'package:uyir_maruthuvam_new/widget/weekly_calander.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 
 class AppointmentScreen extends StatefulWidget {
   final String doctorId;
@@ -14,6 +16,7 @@ class AppointmentScreen extends StatefulWidget {
 }
 
 class _AppointmentScreenState extends State<AppointmentScreen> {
+  final NotificationService _notificationService = NotificationService();
 
   List<String> timeSlots = [
     "10:00 AM",
@@ -228,7 +231,29 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
               'status': 'pending',
               'createdAt': FieldValue.serverTimestamp(),
             });
+            // Get patient name for notification
+            String patientName = FirebaseAuth.instance.currentUser?.displayName ?? 'Patient';
 
+// Send notification to doctor
+            await _notificationService.createAppointmentBookingNotification(
+              doctorId: doctorId,
+              patientId: patientId,
+              patientName: patientName,
+              appointmentDate: selectedDate!,
+              appointmentTime: timeSlots[selectedIndex],
+            );
+// Also create notification for patient
+            await _notificationService.createCustomNotification(
+              userId: patientId,
+              title: 'Appointment Booked',
+              body: 'Your appointment has been booked for ${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} at ${timeSlots[selectedIndex]}',
+              type: 'appointment_booking',
+              data: {
+                'doctorId': doctorId,
+                'appointmentDate': Timestamp.fromDate(selectedDate!),
+                'appointmentTime': timeSlots[selectedIndex],
+              },
+            );
             Navigator.push(
               context,
               MaterialPageRoute(

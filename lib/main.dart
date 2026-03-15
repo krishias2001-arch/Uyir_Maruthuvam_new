@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:uyir_maruthuvam_new/auth_services/auth_gate.dart';
-import 'package:uyir_maruthuvam_new/services/notification_service.dart';
+import 'package:uyir_maruthuvam_new/services/notification_services.dart';
 import 'package:uyir_maruthuvam_new/welcome_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,18 +10,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-
-    // Initialize Notifications
-    await NotificationService().init();
-
   } catch (e) {
-    print("Initialization error: $e");
+    debugPrint("Initialization error: $e");
   }
-
+  await NotificationService().init();
   runApp(const MyApp());
 }
 

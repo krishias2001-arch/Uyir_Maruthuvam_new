@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/widget/upcoming_schedule.dart';
+import 'package:uyir_maruthuvam_new/widget/patient_upcoming_schedule.dart';
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});
@@ -11,7 +11,7 @@ class ScheduleScreen extends StatefulWidget {
 class _ScheduleScreenState extends State<ScheduleScreen> {
   int _buttonIndex = 0;
 
-  final _scheduleWidgets = [UpcomingSchedule(), Container(), Container()];
+  final _scheduleWidgets = [PatientUpcomingSchdule(), Container(), Container()];
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +38,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   InkWell(
                     onTap: () {
@@ -48,7 +49,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         vertical: 12,
-                        horizontal: 25,
+                        horizontal: 20,
                       ),
                       decoration: BoxDecoration(
                         color: _buttonIndex == 0
@@ -77,7 +78,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         vertical: 12,
-                        horizontal: 25,
+                        horizontal: 20,
                       ),
                       decoration: BoxDecoration(
                         color: _buttonIndex == 1
@@ -106,7 +107,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     child: Container(
                       padding: EdgeInsets.symmetric(
                         vertical: 12,
-                        horizontal: 25,
+                        horizontal: 20,
                       ),
                       decoration: BoxDecoration(
                         color: _buttonIndex == 2

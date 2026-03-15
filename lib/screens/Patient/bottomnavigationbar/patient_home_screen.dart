@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uyir_maruthuvam_new/services/notification_services.dart';
 import '../patient_view_docter_screen.dart';
 import '../widgets/patient_notification_bell.dart';
+
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -16,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> catNames = ["Dental", "Heart", "Eye", "Brain", "Ear"];
+  final NotificationService _notificationService = NotificationService();
 
   final List<Icon> catIcons = [
     Icon(MdiIcons.toothOutline, color: Colors.redAccent, size: 30),
@@ -57,14 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       Spacer(),
-                      StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('notifications')
-                            .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-                            .where('isRead', isEqualTo: false)
-                            .snapshots(),
+                      StreamBuilder<int>(
+                        stream: _notificationService.getUnreadNotificationsCount(
+                          _notificationService.getCurrentUserId() ?? '',
+                        ),
                         builder: (context, snapshot) {
-                          int unreadCount = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                          int unreadCount = snapshot.data ?? 0;
                           
                           return Stack(
                             children: [
@@ -73,14 +74,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => PatientNotificationBell(),
+                                      builder: (context) => const PatientNotificationBell(),
                                     ),
                                   );
                                 },
                                 child: Container(
-                                  padding: EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: Color(0xFFF2F8FF),
+                                    color: const Color(0xFFF2F8FF),
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
@@ -92,7 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   child: Center(
                                     child: Icon(
-                                      Icons.notifications_outlined,
+                                      unreadCount > 0 
+                                          ? Icons.notifications_active 
+                                          : Icons.notifications_outlined,
                                       color: Colors.redAccent,
                                       size: 30,
                                     ),
@@ -103,19 +106,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Positioned(
                                   right: 8,
                                   top: 8,
-                                  child: Container(
-                                    padding: EdgeInsets.all(4),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
                                       color: Colors.red,
                                       shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.red.withOpacity(0.3),
+                                          spreadRadius: 2,
+                                          blurRadius: 4,
+                                        ),
+                                      ],
                                     ),
-                                    constraints: BoxConstraints(
-                                      minWidth: 16,
-                                      minHeight: 16,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 18,
+                                      minHeight: 18,
                                     ),
                                     child: Text(
                                       unreadCount > 99 ? '99+' : unreadCount.toString(),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
