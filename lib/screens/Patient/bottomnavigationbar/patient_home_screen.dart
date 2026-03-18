@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:uyir_maruthuvam_new/services/notification_services.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/widgets/notification_bell.dart';
+import 'package:uyir_maruthuvam_new/Notification_services/notification_services.dart';
 import '../patient_view_docter_screen.dart';
-import '../widgets/patient_notification_bell.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -17,16 +15,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<String> catNames = ["Dental", "Heart", "Eye", "Brain", "Ear"];
+
   final NotificationService _notificationService = NotificationService();
 
-  final List<Icon> catIcons = [
-    Icon(MdiIcons.toothOutline, color: Colors.redAccent, size: 30),
-    Icon(MdiIcons.heartPlus, color: Colors.redAccent, size: 30),
-    Icon(MdiIcons.eye, color: Colors.redAccent, size: 30),
-    Icon(MdiIcons.brain, color: Colors.redAccent, size: 30),
-    Icon(MdiIcons.earHearing, color: Colors.redAccent, size: 30),
-  ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const PatientNotificationBell(),
+                                      builder: (context) => const NotificationBell(),
                                     ),
                                   );
                                 },
@@ -142,44 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(
-                    top: 20,
-                    left: 15,
-                    right: 15,
-                    bottom: 20,
-                  ),
-                  width: MediaQuery.of(context).size.width,
-                  height: 55,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        spreadRadius: 3,
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: catNames.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 10),
-                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFF2F8FF),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(child: catIcons[index]),
-                      );
-                    },
-                  ),
-                ),
+
               ],
             ),
           ),
@@ -257,8 +212,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                              DocterScreen(doctorId: doctorId),
+                                        builder: (context) => PatientViewDocterScreen(
+                                          doctorId: doctorId,
+                                        ),
                                       ),
                                     );
                                   },
@@ -357,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                                DocterScreen(doctorId: doctorId),
+                                                PatientViewDocterScreen(doctorId: doctorId),
                                       ),
                                     );
                                   },

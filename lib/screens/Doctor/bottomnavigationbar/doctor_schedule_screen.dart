@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/model/appointment_model.dart';
-import 'package:uyir_maruthuvam_new/widget/weekly_calander.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/widgets/appointment_table.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../../common widget/weekly_calander.dart';
 
 class DoctorScheduleScreen extends StatefulWidget {
   const DoctorScheduleScreen({super.key});

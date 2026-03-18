@@ -1,14 +1,35 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class DoctorProfileCard extends StatefulWidget {
-  const DoctorProfileCard({super.key});
 
+  final String clinicName;
+  final String doctorName;
+  final String specialization;
+  final String imageUrl;
+  final bool isAvailable;
+
+  const DoctorProfileCard({
+  super.key,
+  required this.clinicName,
+  required this.doctorName,
+  required this.specialization,
+  required this.imageUrl,
+  required this.isAvailable,
+  });
   @override
   State<DoctorProfileCard> createState() => _DoctorProfileCardState();
 }
 
 class _DoctorProfileCardState extends State<DoctorProfileCard> {
-  bool isAvailable = true;
+  late bool isAvailable;
+
+  @override
+  void initState() {
+    super.initState();
+    isAvailable = widget.isAvailable;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +52,28 @@ class _DoctorProfileCardState extends State<DoctorProfileCard> {
               height: 150,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12), // rounded rectangle
-                image: DecorationImage(
-                  image: AssetImage("images/doctor1.jpg"),
-                  fit: BoxFit.cover,
-                ),
+                color: widget.imageUrl.isEmpty ? Colors.grey[300] : null,
               ),
+              child: widget.imageUrl.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        widget.imageUrl,
+                        width: 110,
+                        height: 150,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.person, size: 50, color: Colors.grey),
+                          );
+                        },
+                      ),
+                    )
+                  : Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.person, size: 50, color: Colors.grey),
+                    ),
             ),
           ),
 
@@ -46,17 +84,17 @@ class _DoctorProfileCardState extends State<DoctorProfileCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Uyir Maruthuvam Clinic",
+                  widget.clinicName,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "Dr. Krishna",
+                  widget.doctorName,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "General Physician",
+                  widget.specialization,
                   style: TextStyle(fontSize: 14, color: Colors.white70),
                 ),
                 SizedBox(height: 8),
@@ -71,9 +109,16 @@ class _DoctorProfileCardState extends State<DoctorProfileCard> {
                     ),
                     Switch(
                       value: isAvailable,
-                      onChanged: (value) {
+                      onChanged: (value) async {
                         setState(() {
                           isAvailable = value;
+                        });
+
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(FirebaseAuth.instance.currentUser!.uid)
+                            .update({
+                          'isAvailable': value,
                         });
                       },
                       activeThumbColor: Colors.green, // ON circle

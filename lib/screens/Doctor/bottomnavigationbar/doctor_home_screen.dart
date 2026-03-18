@@ -4,9 +4,9 @@ import 'package:uyir_maruthuvam_new/screens/Doctor/widgets/doctor_profile_card.d
 import 'package:uyir_maruthuvam_new/screens/Doctor/widgets/notification_bell.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/widgets/todaysummarycard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:uyir_maruthuvam_new/widget/language_selector.dart';
+import 'package:uyir_maruthuvam_new/common widget/language_selector.dart';
 import 'package:uyir_maruthuvam_new/auth_services/google_auth.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 class DoctorHomeScreen extends StatefulWidget {
   final VoidCallback? onLogout;
    const DoctorHomeScreen({super.key, this.onLogout});
@@ -17,52 +17,20 @@ class DoctorHomeScreen extends StatefulWidget {
 
 class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   final user = FirebaseAuth.instance.currentUser;
+  
+  // Add a stream key to force refresh
+
   @override
   Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
+    DateTime startOfDay = DateTime(now.year, now.month, now.day);
+    DateTime endOfDay = startOfDay.add(const Duration(days: 1));
     return Scaffold(
       appBar: AppBar(
         title: const Text("Uyir Maruthuvam"),
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => NotificationBell()),
-                  );
-                },
-              ),
-
-              // 🔴 Notification Badge
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: const Text(
-                    '3', // notification count
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+          actions: const [
+            NotificationBell(),
+          ]
       ),
       drawer: Drawer(
         child: ListView(
@@ -87,8 +55,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   Navigator.pop(context); // close drawer
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => DoctorProfileSetupScreen()),
-                  );
+                    MaterialPageRoute(builder: (_) => const DoctorProfileSetupScreen()),
+                  ).then((_) {
+                    // Force refresh when returning from profile setup
+                    setState(() {});
+                    // Also refresh the stream
+                    setState(() {
+                      // This will trigger a rebuild
+                    });
+                  });
                 }
             ),
             ListTile(
@@ -118,15 +93,80 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            DoctorProfileCard(),
-            SizedBox(height: 10),
-            TodaySummaryCard(total: 15, pending: 3, confirmed: 12),
-          ],
-        ),
-      ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+
+              StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+
+                  if (!snapshot.hasData) {
+                    return const CircularProgressIndicator();
+                  }
+
+                  final data = snapshot.data!.data() as Map<String, dynamic>;
+
+                  return DoctorProfileCard(
+                    clinicName: data['clinic'] ?? '',
+                    doctorName: data['name'] ?? '',
+                    specialization: data['specialization'] ?? '',
+                    imageUrl: data['imageUrl'] ?? '',
+                    isAvailable: data['isAvailable'] ?? false,
+                  );
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('appointments')
+                    .where('doctorId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                    .where('appointmentDate', isGreaterThanOrEqualTo: startOfDay)
+                    .where('appointmentDate', isLessThan: endOfDay)
+                    .snapshots(),
+                builder: (context, snapshot) {
+
+                  if (!snapshot.hasData) {
+                    return const CircularProgressIndicator();
+                  }
+
+                  int total = 0;
+                  int pending = 0;
+                  int confirmed = 0;
+
+                  for (var doc in snapshot.data!.docs) {
+
+                    final data = doc.data() as Map<String, dynamic>;
+                    final status = data['status'];
+
+                    total++;
+
+                    if (status == 'pending') {
+                      pending++;
+                    }
+
+                    if (status == 'confirmed') {
+                      confirmed++;
+                    }
+                  }
+
+                  return TodaySummaryCard(
+                    total: total,
+                    pending: pending,
+                    confirmed: confirmed,
+                  );
+                },
+              ),
+
+            ],
+          ),
+        )
+
     );
   }
 }

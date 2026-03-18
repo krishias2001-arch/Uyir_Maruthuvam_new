@@ -1,53 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uyir_maruthuvam_new/Notification_services/notification_screen.dart';
+import 'package:uyir_maruthuvam_new/Notification_services/notification_services.dart';
+
+
 
 class NotificationBell extends StatelessWidget {
   const NotificationBell({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Notifications")),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
-        children: const [
-          NotificationTile(
-            title: "New appointment request",
-            subtitle: "Patient: Arun • 10:30 AM",
-          ),
-          Divider(),
+    final user = FirebaseAuth.instance.currentUser;
 
-          NotificationTile(
-            title: "Appointment Cancelled",
-            subtitle: "Patient: Priya • 11:00 AM",
-          ),
-          Divider(),
+    if (user == null) return const SizedBox();
 
-          NotificationTile(
-            title: "Lab report uploaded",
-            subtitle: "Patient: Karthik",
-          ),
-        ],
-      ),
-    );
-  }
-}
+    return Stack(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_none),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NotificationScreen(),
+              ),
+            );
+          },
+        ),
 
-class NotificationTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
+        /// 🔴 Unread badge
+        StreamBuilder<int>(
+          stream: NotificationService()
+              .getUnreadNotificationsCount(user.uid),
+          builder: (context, snapshot) {
+            int count = snapshot.data ?? 0;
 
-  const NotificationTile({
-    super.key,
-    required this.title,
-    required this.subtitle,
-  });
+            if (count == 0) return const SizedBox();
 
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.notifications, color: Colors.blueAccent),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      subtitle: Text(subtitle),
+            return Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 16,
+                  minHeight: 16,
+                ),
+                child: Text(
+                  count.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

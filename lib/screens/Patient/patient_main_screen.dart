@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uyir_maruthuvam_new/screens/Patient/bottomnavigationbar/Doctor_search_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Patient/patient_profile_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Patient/patient_storage_screen.dart';
 import 'package:uyir_maruthuvam_new/auth_services/google_auth.dart';
@@ -25,7 +26,7 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
 
     _screens = [
       HomeScreen(username: widget.username),
-      const Center(child: Text("Messages")),
+      const SearchScreen(),
       const ScheduleScreen(),
     ];
   }
@@ -53,8 +54,9 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Home"),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.chat_bubble_text_fill),
-            label: "Chat",
+            icon: Icon(CupertinoIcons.search_circle_fill),
+            label: "search",
+
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month_outlined),

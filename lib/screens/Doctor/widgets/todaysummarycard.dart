@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_schedule_screen.dart';
 
 class TodaySummaryCard extends StatelessWidget {
   final int total;
@@ -19,26 +20,37 @@ class TodaySummaryCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Colors.blueGrey,
       elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Today Summary",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const DoctorScheduleScreen(),
             ),
-            const SizedBox(height: 16),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Today Summary",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _summaryItem("Total", "15", Colors.blue),
-                _summaryItem("Pending", "3", Colors.orange),
-                _summaryItem("Confirmed", "12", Colors.green),
-              ],
-            ),
-          ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _summaryItem("Total", total.toString(), Colors.blue),
+                  _summaryItem("Pending", pending.toString(), Colors.orange),
+                  _summaryItem("Confirmed", confirmed.toString(), Colors.green),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

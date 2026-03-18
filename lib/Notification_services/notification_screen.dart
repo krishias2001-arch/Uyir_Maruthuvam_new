@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../../services/notification_services.dart';
+import 'notification_services.dart';
 
-
-class PatientNotificationBell extends StatefulWidget {
-  const PatientNotificationBell({super.key});
+class NotificationScreen extends StatefulWidget {
+  const NotificationScreen({super.key});
 
   @override
-  State<PatientNotificationBell> createState() => _PatientNotificationBellState();
+  State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _PatientNotificationBellState extends State<PatientNotificationBell> {
+class _NotificationScreenState extends State<NotificationScreen> {
   final NotificationService _notificationService = NotificationService();
 
   @override
@@ -62,6 +60,12 @@ class _PatientNotificationBellState extends State<PatientNotificationBell> {
           _notificationService.getCurrentUserId() ?? '',
         ),
         builder: (context, snapshot) {
+          debugPrint('Snapshot state: ${snapshot.connectionState}');
+          debugPrint('Has data: ${snapshot.hasData}');
+          if (snapshot.hasData) {
+            debugPrint('Notifications count: ${snapshot.data!.docs.length}');
+          }
+          
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
@@ -73,6 +77,7 @@ class _PatientNotificationBellState extends State<PatientNotificationBell> {
           if (!_notificationService.isCurrentUserAuthenticated() || 
               !snapshot.hasData || 
               snapshot.data!.docs.isEmpty) {
+            debugPrint('Showing empty state');
             return _buildEmptyState();
           }
 
@@ -90,7 +95,7 @@ class _PatientNotificationBellState extends State<PatientNotificationBell> {
                 final doc = notifications[index];
                 final data = doc.data() as Map<String, dynamic>;
                 
-                return PatientNotificationTile(
+                return NotificationTile(
                   notificationId: doc.id,
                   title: data['title'] ?? 'Notification',
                   body: data['body'] ?? 'No details',
@@ -142,9 +147,9 @@ class _PatientNotificationBellState extends State<PatientNotificationBell> {
   }
 
   void _handleNotificationTap(String notificationId, bool isRead) async {
-    if (!isRead) {
-      await _notificationService.markNotificationAsRead(notificationId);
-    }
+    // Don't automatically mark as read - let user do it manually
+    // This prevents notifications from disappearing when tapped
+    debugPrint('Notification tapped: $notificationId');
   }
 
   void _showNotificationOptions(String notificationId) {
@@ -206,7 +211,7 @@ class _PatientNotificationBellState extends State<PatientNotificationBell> {
   }
 }
 
-class PatientNotificationTile extends StatelessWidget {
+class NotificationTile extends StatelessWidget {
   final String notificationId;
   final String title;
   final String body;
@@ -217,7 +222,7 @@ class PatientNotificationTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
-  const PatientNotificationTile({
+  const NotificationTile({
     super.key,
     required this.notificationId,
     required this.title,

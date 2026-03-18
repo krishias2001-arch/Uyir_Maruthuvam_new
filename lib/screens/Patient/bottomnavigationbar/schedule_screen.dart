@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/widget/patient_upcoming_schedule.dart';
+import 'package:uyir_maruthuvam_new/common widget/patient_upcoming_schedule.dart';
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});

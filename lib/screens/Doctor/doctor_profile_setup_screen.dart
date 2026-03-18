@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uyir_maruthuvam_new/screens/Doctor/Doctor_main_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import 'package:geolocator/geolocator.dart';
 class DoctorProfileSetupScreen extends StatefulWidget {
   const DoctorProfileSetupScreen({super.key});
 
@@ -23,6 +26,12 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
   final TextEditingController clinicController = TextEditingController();
   final TextEditingController clinicaddressController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  File? _image;
+  String? imageUrl;
+  final ImagePicker _picker = ImagePicker();
+  double? latitude;
+  double? longitude;
+  bool locationAdded = false;
 
   @override
   void initState() {
@@ -30,6 +39,74 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
     loadProfile();
   }
 
+
+  Future<Position?> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check location services
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Enable location services")),
+      );
+      return null;
+    }
+
+    // Check permission
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return null;
+    }
+
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+  Future<void> pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+  Future<String?> uploadImage() async {
+    if (_image == null) return imageUrl;
+
+    try {
+      final uid = FirebaseAuth.instance.currentUser!.uid;
+
+      final storage = FirebaseStorage.instanceFor(
+        bucket: 'uyirmaruthuvam-d3601.firebasestorage.app',
+      );
+
+      final ref = storage
+          .ref()
+          .child('doctor_images')
+          .child('$uid.jpg');
+
+      await ref.putFile(_image!);
+
+      final downloadUrl = await ref.getDownloadURL();
+
+      print("Download URL: $downloadUrl");
+
+      return downloadUrl;
+
+    } catch (e) {
+      print("UPLOAD ERROR: $e");
+      return null;
+    }
+  }
   Future<void> loadProfile() async {
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
@@ -44,12 +121,26 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
       experienceController.text = data['experience'] ?? "";
       registrationController.text = data['registration'] ?? "";
       clinicaddressController.text = data['clinicAddress'] ?? "";
+
       phoneController.text = data['phone'] ?? "";
+      
+      final loadedImageUrl = data['imageUrl'] as String?;
+      print('Loaded image URL from Firestore: $loadedImageUrl');
+      
+      setState(() {
+        imageUrl = loadedImageUrl;
+      });
 
       if (data['profileCompleted'] ?? false) {
         setState(() {
           isEditMode = true;
         });
+      }
+      latitude = data['latitude'];
+      longitude = data['longitude'];
+
+      if (latitude != null && longitude != null) {
+        locationAdded = true;
       }
     }
   }
@@ -83,6 +174,45 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                GestureDetector(
+                  onTap: pickImage,
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Colors.blueAccent,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey[300],
+                      child: Stack(
+                        children: [
+                          if (_image != null)
+                            ClipOval(
+                              child: Image.file(
+                                _image!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          else if (imageUrl != null && imageUrl!.isNotEmpty)
+                            ClipOval(
+                              child: Image.network(
+                                imageUrl!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(Icons.person, size: 40, color: Colors.grey);
+                                },
+                              ),
+                            )
+                          else
+                            const Icon(Icons.camera_alt, size: 40, color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 _buildTextField(nameController, "Full Name"),
                 _buildTextField(specializationController, "Specialization"),
                 _buildTextField(
@@ -96,6 +226,34 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                 ),
                 _buildTextField(clinicController, "Clinic / Hospital Name"),
                 _buildTextField(clinicaddressController, "Clinic Address"),
+                const SizedBox(height: 10),
+
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final position = await _getCurrentLocation();
+
+                    if (position != null) {
+                      setState(() {
+                        latitude = position.latitude;
+                        longitude = position.longitude;
+                        locationAdded = true;
+                      });
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Location added successfully")),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.location_on),
+                  label: Text(
+                    locationAdded ? "Location Added ✓" : "Add Clinic Location (Optional)",
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                    locationAdded ? Colors.green : Colors.redAccent,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
                 _buildTextField(
                   phoneController,
                   "Phone Number",
@@ -107,38 +265,47 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        try {
-                          await FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(FirebaseAuth.instance.currentUser!.uid)
-                              .update({
-                            'name': nameController.text,
-                            'specialization': specializationController.text,
-                            'clinic': clinicController.text,
-                            'experience': experienceController.text,
-                            'registration': registrationController.text,
-                            'clinicAddress': clinicaddressController.text,
-                            'phone': phoneController.text,
-                            'profileCompleted': true,
-                          });
-                          
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Profile completed successfully!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error: $e'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
+  if (_formKey.currentState!.validate()) {
+
+    final uploadedImageUrl = await uploadImage();
+
+    print("Uploaded image URL: $uploadedImageUrl");
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .set({
+      'name': nameController.text,
+      'specialization': specializationController.text,
+      'clinic': clinicController.text,
+      'experience': experienceController.text,
+      'registration': registrationController.text,
+      'clinicAddress': clinicaddressController.text,
+      'phone': phoneController.text,
+      'imageUrl': uploadedImageUrl ?? "",
+      'profileCompleted': true,
+
+      // ✅ NEW (optional)
+      'latitude': latitude,
+      'longitude': longitude,
+
+    }, SetOptions(merge: true));
+
+    setState(() {
+      imageUrl = uploadedImageUrl;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          locationAdded
+              ? "Profile saved with location"
+              : "Profile saved (add location later for map visibility)",
+        ),
+      ),
+    );
+  }
+},
                     child: Text(
                       isEditMode ? "Save Changes" : "Save & Continue",
                     ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/screens/payment services/payment_screen.dart';
-import 'package:uyir_maruthuvam_new/services/notification_services.dart';
-import 'package:uyir_maruthuvam_new/widget/weekly_calander.dart';
+import 'package:uyir_maruthuvam_new/Notification_services/notification_services.dart';
+import 'package:uyir_maruthuvam_new/common widget/weekly_calander.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
