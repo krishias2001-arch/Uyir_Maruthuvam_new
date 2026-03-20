@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uyir_maruthuvam_new/screens/Appointments/patient_view_doctor_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/widgets/notification_bell.dart';
+import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 
 import '../../../services/notification_services.dart';
-
-
-
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -21,40 +19,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final NotificationService _notificationService = NotificationService();
 
-
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(top: 30),
+        padding: const EdgeInsets.only(top: 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
           Padding(
-            padding: EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: Row(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 30,
                         backgroundImage: AssetImage(
                           "assets/images/patient_profile.jpg",
                         ),
                       ),
-                      SizedBox(width: 15),
+                      const SizedBox(width: 15),
                       Text(
-                        "Hello, ${widget.username}",
-                        style: TextStyle(
+                        l10n.hello(widget.username),
+                        style: const TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       StreamBuilder<int>(
                         stream: _notificationService.getUnreadNotificationsCount(
                           _notificationService.getCurrentUserId() ?? '',
@@ -75,8 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF2F8FF),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFF2F8FF),
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
@@ -141,11 +138,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Padding(
-            padding: EdgeInsets.only(left: 15),
+            padding: const EdgeInsets.only(left: 15),
             child: Text(
-              "Our Best Doctors",
+              l10n.bestDoctors,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
@@ -153,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          Container(
+          SizedBox(
             height: 360,
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
@@ -169,10 +166,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 var doctors = snapshot.data!.docs;
 
                 if (doctors.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
-                      "No doctors available",
-                      style: TextStyle(fontSize: 16),
+                      l10n.noDoctorsAvailable,
+                      style: const TextStyle(fontSize: 16),
                     ),
                   );
                 }
@@ -190,14 +187,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Container(
                       height: 320,
                       width: 200,
-                      margin: EdgeInsets.symmetric(
+                      margin: const EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 20,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black12,
                             spreadRadius: 2,
@@ -222,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     );
                                   },
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.only(
+                                    borderRadius: const BorderRadius.only(
                                       topLeft: Radius.circular(15),
                                       topRight: Radius.circular(15),
                                     ),
@@ -241,10 +238,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Align(
                                   alignment: Alignment.topRight,
                                   child: Container(
-                                    margin: EdgeInsets.all(8),
+                                    margin: const EdgeInsets.all(8),
                                     height: 45,
                                     width: 45,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
                                       boxShadow: [
@@ -255,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ],
                                     ),
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.favorite_outline,
                                       color: Colors.redAccent,
                                       size: 25,
@@ -264,9 +261,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 5),
+                              padding: const EdgeInsets.symmetric(horizontal: 5),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -289,11 +286,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: 8),
+                                  const SizedBox(height: 8),
                                   Row(
                                     children: [
-                                      Icon(Icons.star, color: Colors.amber),
-                                      SizedBox(width: 5),
+                                      const Icon(Icons.star, color: Colors.amber),
+                                      const SizedBox(width: 5),
                                       Text(
                                         "4.9",
                                         style: TextStyle(
@@ -306,8 +303,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Container(
+                            const SizedBox(height: 8),
+                            SizedBox(
                               height: 50,
                               child: Center(
                                 child: ElevatedButton(
@@ -327,7 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  child: Text("Book Appointment"),
+                                  child: Text(l10n.bookAppointment),
                                 ),
                               ),
                             ),

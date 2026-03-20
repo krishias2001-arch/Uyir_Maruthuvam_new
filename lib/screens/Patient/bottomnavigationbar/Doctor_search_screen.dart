@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uyir_maruthuvam_new/screens/Appointments/patient_view_doctor_screen.dart';
-
-
+import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -16,20 +15,22 @@ class _SearchScreenState extends State<SearchScreen> {
   String searchQuery = "";
   String selectedCategory = "All";
 
-  final List<String> categories = [
-    "All",
-    "Dental",
-    "Heart",
-    "Eye",
-    "Brain",
-    "Ear",
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    final List<String> categories = [
+      l10n.all,
+      l10n.dental,
+      l10n.heart,
+      l10n.eye,
+      l10n.brain,
+      l10n.ear,
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Search Doctors"),
+        title: Text(l10n.searchDoctors),
       ),
       body: Column(
         children: [
@@ -39,12 +40,12 @@ class _SearchScreenState extends State<SearchScreen> {
             padding: const EdgeInsets.all(12),
             child: TextField(
               decoration: InputDecoration(
-                hintText: "Search doctor or specialization...",
+                hintText: l10n.searchHint,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.filter_list),
                   onPressed: () {
-                    _showFilterBottomSheet();
+                    _showFilterBottomSheet(context);
                   },
                 ),
                 border: OutlineInputBorder(
@@ -123,14 +124,14 @@ class _SearchScreenState extends State<SearchScreen> {
                   bool matchesSearch = name.contains(searchQuery) ||
                       specialization.contains(searchQuery);
 
-                  bool matchesCategory = selectedCategory == "All" ||
+                  bool matchesCategory = selectedCategory == l10n.all ||
                       specialization.contains(selectedCategory.toLowerCase());
 
                   return matchesSearch && matchesCategory;
                 }).toList();
 
                 if (filteredDoctors.isEmpty) {
-                  return const Center(child: Text("No doctors found"));
+                  return Center(child: Text(l10n.noDoctorsFound));
                 }
 
                 return ListView.builder(
@@ -176,7 +177,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   /// 🎯 FILTER BOTTOM SHEET
-  void _showFilterBottomSheet() {
+  void _showFilterBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (context) {

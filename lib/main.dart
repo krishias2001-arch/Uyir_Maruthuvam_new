@@ -10,6 +10,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 
 import 'package:provider/provider.dart';
 import 'locale_provider.dart';
+import 'l10n/app_localizations.dart';
 
 
 Future<void> main() async {
@@ -92,14 +93,10 @@ class _MyAppState extends State<MyApp> {
       // ✅ USE provider here
       locale: localeProvider.locale,
 
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ta'),
-      ],
+      supportedLocales: AppLocalizations.supportedLocales,
 
       localizationsDelegates: const [
-        // ⚠️ don't forget this if using ARB
-        // AppLocalizations.delegate,
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

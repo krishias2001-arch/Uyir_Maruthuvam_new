@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/common widget/patient_upcoming_schedule.dart';
+import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});
@@ -11,128 +12,73 @@ class ScheduleScreen extends StatefulWidget {
 class _ScheduleScreenState extends State<ScheduleScreen> {
   int _buttonIndex = 0;
 
-  final _scheduleWidgets = [PatientUpcomingSchdule(), Container(), Container()];
+  final _scheduleWidgets = [const PatientUpcomingSchdule(), Container(), Container()];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.only(top: 30),
+        padding: const EdgeInsets.only(top: 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Text(
-                "Schedule",
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+                l10n.schedule,
+                style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Container(
-              padding: EdgeInsets.all(5),
-              margin: EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.all(5),
+              margin: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: Color(0xFFF4F6FA),
+                color: const Color(0xFFF4F6FA),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        _buttonIndex = 0;
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 20,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _buttonIndex == 0
-                            ? Colors.red
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        "Upcoming",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: _buttonIndex == 0
-                              ? Colors.white
-                              : Colors.black38,
-                        ),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        _buttonIndex = 1;
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 20,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _buttonIndex == 1
-                            ? Colors.red
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        "Completed",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: _buttonIndex == 1
-                              ? Colors.white
-                              : Colors.black38,
-                        ),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        _buttonIndex = 2;
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 20,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _buttonIndex == 2
-                            ? Colors.red
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        "Cancelled",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: _buttonIndex == 2
-                              ? Colors.white
-                              : Colors.black38,
-                        ),
-                      ),
-                    ),
-                  ),
+                  _buildTabButton(0, l10n.upcoming),
+                  _buildTabButton(1, l10n.completed),
+                  _buildTabButton(2, l10n.cancelled),
                 ],
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             _scheduleWidgets[_buttonIndex],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(int index, String label) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _buttonIndex = index;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: 20,
+        ),
+        decoration: BoxDecoration(
+          color: _buttonIndex == index ? Colors.red : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: _buttonIndex == index ? Colors.white : Colors.black38,
+          ),
         ),
       ),
     );

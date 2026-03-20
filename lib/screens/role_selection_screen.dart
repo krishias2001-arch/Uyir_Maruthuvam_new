@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
         body: SafeArea(
@@ -18,19 +20,19 @@ class RoleSelectionScreen extends StatelessWidget {
             children: [
               Image.asset('assets/images/logo.jpg', height: 100),
               const SizedBox(height: 30),
-              const Text(
-                "Welcome to Uyir Maruthuvam",
+              Text(
+                l10n.welcomeToUyirMaruthuvam,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.redAccent,
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                "Please select your role to continue",
-                style: TextStyle(fontSize: 15, color: Colors.black54),
+              Text(
+                l10n.selectRole,
+                style: const TextStyle(fontSize: 15, color: Colors.black54),
               ),
               const SizedBox(height: 40),
 
@@ -52,7 +54,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
                     await FirebaseFirestore.instance
                         .collection('users')
-                        .doc(user!.uid)
+                        .doc(user.uid)
                         .set({
                       'role': 'patient',
                       'profileCompleted': false,
@@ -61,9 +63,9 @@ class RoleSelectionScreen extends StatelessWidget {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text(
-                    "Continue as Patient",
-                    style: TextStyle(fontSize: 16),
+                  child: Text(
+                    l10n.continueAsPatient,
+                    style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),
@@ -88,7 +90,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
                     await FirebaseFirestore.instance
                         .collection('users')
-                        .doc(user!.uid)
+                        .doc(user.uid)
                         .set({
                       'role': 'doctor',
                       'profileCompleted': false,
@@ -97,9 +99,9 @@ class RoleSelectionScreen extends StatelessWidget {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text(
-                    "Continue as Doctor",
-                    style: TextStyle(fontSize: 16, color: Colors.redAccent),
+                  child: Text(
+                    l10n.continueAsDoctor,
+                    style: const TextStyle(fontSize: 16, color: Colors.redAccent),
                   ),
                 ),
               ),

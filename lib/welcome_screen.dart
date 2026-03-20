@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/auth_services/auth_gate.dart';
 import 'package:uyir_maruthuvam_new/locale_provider.dart';
-import 'package:uyir_maruthuvam_new/main.dart';
 import 'package:provider/provider.dart';
+import 'l10n/app_localizations.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -15,6 +15,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -30,23 +32,26 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
                 const SizedBox(height: 20),
 
-                const Text(
-                  "Uyir Maruthuvam",
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.redAccent,
+                Flexible(
+                  child: Text(
+                    l10n.welcomeToUyirMaruthuvam,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.redAccent,
+                    ),
                   ),
                 ),
 
                 const SizedBox(height: 10),
 
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: Text(
-                    "Healing with care, connecting lives.",
+                    l10n.healingWithCare,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 22,
                       color: Colors.black54,
                     ),
@@ -63,15 +68,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             child: PopupMenuButton<String>(
               icon: const Icon(Icons.language, size: 28),
               onSelected: (value) {
-
                 if (value == "en") {
                   context.read<LocaleProvider>().setLocale('en');
                 }
-
                 if (value == "ta") {
                   context.read<LocaleProvider>().setLocale('ta');
                 }
-
               },
               itemBuilder: (context) => const [
                 PopupMenuItem(
@@ -99,9 +101,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ),
                 );
               },
-              child: const Text(
-                "Skip",
-                style: TextStyle(
+              child: Text(
+                l10n.skip,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),

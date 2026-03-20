@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 import 'custom_button.dart';
 import 'custom_field.dart';
 
@@ -11,6 +12,7 @@ class SignupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FD),
       body: SafeArea(
@@ -37,7 +39,7 @@ class SignupScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Text(
-                          'Join us Today',
+                          l10n.joinUsToday,
                           style: TextStyle(
                             color: Color(0xFF4A154B),
                             fontWeight: FontWeight.w600,
@@ -46,7 +48,7 @@ class SignupScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 40),
                       Text(
-                        'Create your account',
+                        l10n.createYourAccount,
                         style: TextStyle(
                           color: Color(0xFF4A154B),
                           fontWeight: FontWeight.w600,
@@ -63,26 +65,26 @@ class SignupScreen extends StatelessWidget {
                     children: [
                       CustomTextField(
                         icon: CupertinoIcons.mail,
-                        hint: 'Email',
+                        hint: l10n.email,
                         gradientColors: [Color(0xFF4A154B), Color(0xFF6B1A6B)],
                       ),
                       SizedBox(height: 16),
                       CustomTextField(
                         icon: CupertinoIcons.person,
-                        hint: 'User name',
+                        hint: l10n.userName,
                         gradientColors: [Color(0xFF4A154B), Color(0xFF6B1A6B)],
                       ),
                       SizedBox(height: 16),
                       CustomTextField(
                         icon: CupertinoIcons.lock,
-                        hint: 'Password',
+                        hint: l10n.password,
                         ispassword: true,
                         gradientColors: [Color(0xFF4A154B), Color(0xFF6B1A6B)],
                       ),
                       SizedBox(height: 16),
                       CustomTextField(
                         icon: CupertinoIcons.lock,
-                        hint: 'Confirm Password',
+                        hint: l10n.confirmPassword,
                         ispassword: true,
                         gradientColors: [Color(0xFF4A154B), Color(0xFF6B1A6B)],
                       ),
@@ -93,7 +95,7 @@ class SignupScreen extends StatelessWidget {
                 FadeInUp(
                   duration: Duration(milliseconds: 600),
                   delay: Duration(milliseconds: 400),
-                  child: CustomButton(onPressed: () {}, text: 'Create Account'),
+                  child: CustomButton(onPressed: () {}, text: l10n.createAccount),
                 ),
                 SizedBox(height: 24),
                 FadeIn(
@@ -103,13 +105,13 @@ class SignupScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Already have an account?",
+                        l10n.alreadyHaveAccount,
                         style: TextStyle(color: Color(0xFF1D1C1D)),
                       ),
                       GestureDetector(
                         onTap: onLoginTap,
                         child: Text(
-                          'Log In',
+                          ' ${l10n.login}',
                           style: TextStyle(
                             color: Color(0xFF4A154B),
                             fontWeight: FontWeight.bold,
@@ -132,7 +134,7 @@ class SignupScreen extends StatelessWidget {
                               height: 1,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Colors.transparent, Color(0xFFE0E0)],
+                                  colors: [Colors.transparent, Color(0xFFE0E0E0)],
                                 ),
                               ),
                             ),
@@ -140,7 +142,7 @@ class SignupScreen extends StatelessWidget {
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
-                              "Or continue With",
+                              l10n.orContinueWith,
                               style: TextStyle(
                                 color: Color(0xFF1D1C1D),
                                 fontWeight: FontWeight.w500,
@@ -152,7 +154,7 @@ class SignupScreen extends StatelessWidget {
                               height: 1,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Colors.transparent, Color(0xFFE0E0)],
+                                  colors: [Colors.transparent, Color(0xFFE0E0E0)],
                                 ),
                               ),
                             ),
@@ -168,9 +170,9 @@ class SignupScreen extends StatelessWidget {
                             delay: Duration(milliseconds: 1200),
                             child: _buildSocialButton(
                               icon: Icons.apple,
-                              label: 'Apple',
+                              label: l10n.apple,
                               gradientColors: [
-                                Color(0xFFF000000),
+                                Color(0xFF000000),
                                 Color(0xFF2C2C2C),
                               ],
                             ),

@@ -3,6 +3,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 
 import 'custom_button.dart';
 import 'custom_field.dart';
@@ -76,6 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Color(0xFFF8F9FD),
       body: SafeArea(
@@ -104,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
-                            'Welcome Back',
+                            l10n.welcomeBack,
                             style: TextStyle(
                               color: Color(0xFF4A154B),
                               fontWeight: FontWeight.w600,
@@ -113,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         SizedBox(height: 40),
                         Text(
-                          'Log in to your account',
+                          l10n.logInToAccount,
                           style: TextStyle(
                             color: Color(0xFF4A154B),
                             fontWeight: FontWeight.w600,
@@ -131,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CustomTextField(
                           controller: phoneController,
                           icon: CupertinoIcons.phone,
-                          hint: 'Phone Number',
+                          hint: l10n.phoneNumber,
                           gradientColors: [
                             Color(0xFF4A154B),
                             Color(0xFF6B1A6B),
@@ -148,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     delay: Duration(milliseconds: 400),
                     child: CustomButton(
                       onPressed: sendOTP,
-                      text: 'Send OTP',
+                      text: l10n.sendOtp,
                     ),
                   ),
 
@@ -160,13 +162,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Don't have an account?",
+                          l10n.dontHaveAccount,
                           style: TextStyle(color: Color(0xFF1D1C1D)),
                         ),
                         GestureDetector(
                           onTap: widget.onSignupTap,
                           child: Text(
-                            'Sign Up',
+                            ' ${l10n.signUp}',
                             style: TextStyle(
                               color: Color(0xFF4A154B),
                               fontWeight: FontWeight.bold,
@@ -200,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 16),
                               child: Text(
-                                "Or continue With",
+                                l10n.orContinueWith,
                                 style: TextStyle(
                                   color: Color(0xFF1D1C1D),
                                   fontWeight: FontWeight.w500,
@@ -231,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               delay: Duration(milliseconds: 1200),
                               child: _buildSocialButton(
                                 icon: Icons.g_mobiledata,
-                                label: 'Google',
+                                label: l10n.google,
                                 gradientColors: [
                                   Color(0xFFDB4437),
                                   Color(0xFFF66D5B),
@@ -259,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               delay: Duration(milliseconds: 1200),
                               child: _buildSocialButton(
                                 icon: Icons.apple,
-                                label: 'Apple',
+                                label: l10n.apple,
                                 gradientColors: [
                                   Color(0xff000000),
                                   Color(0xFF2C2C2C),
