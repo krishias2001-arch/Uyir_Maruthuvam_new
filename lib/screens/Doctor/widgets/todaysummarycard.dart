@@ -37,7 +37,11 @@ class TodaySummaryCard extends StatelessWidget {
             children: [
               const Text(
                 "Today Summary",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -68,7 +72,10 @@ class TodaySummaryCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(title, style: const TextStyle(fontSize: 13)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 13, color: Colors.white),
+        ),
       ],
     );
   }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:uyir_maruthuvam_new/Notification_services/notification_screen.dart';
-import 'package:uyir_maruthuvam_new/Notification_services/notification_services.dart';
+import 'package:uyir_maruthuvam_new/Features/Appointments/notification_screen.dart';
 
-
+import 'package:uyir_maruthuvam_new/Services/notification_services.dart';
 
 class NotificationBell extends StatelessWidget {
   const NotificationBell({super.key});
@@ -22,7 +21,7 @@ class NotificationBell extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const NotificationScreen(),
+                builder: (_) => NotificationScreen(),
               ),
             );
           },

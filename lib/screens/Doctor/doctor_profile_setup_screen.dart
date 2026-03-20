@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
+import 'package:uyir_maruthuvam_new/Features/Map_services/map_selection_screen.dart';
+
 class DoctorProfileSetupScreen extends StatefulWidget {
   const DoctorProfileSetupScreen({super.key});
 
@@ -15,6 +17,8 @@ class DoctorProfileSetupScreen extends StatefulWidget {
 
 class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
   bool isEditMode = false;
+  String? locationMethod; // "gps" or "map"
+
 
   final _formKey = GlobalKey<FormState>();
 
@@ -26,6 +30,9 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
   final TextEditingController clinicController = TextEditingController();
   final TextEditingController clinicaddressController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+  final TextEditingController feeController = TextEditingController();
+  final TextEditingController aboutController = TextEditingController();
+
   File? _image;
   String? imageUrl;
   final ImagePicker _picker = ImagePicker();
@@ -37,6 +44,70 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
   void initState() {
     super.initState();
     loadProfile();
+  }
+  void _openLocationOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          height: 180,
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.my_location),
+                title: const Text("Use Current Location"),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  final position = await _getCurrentLocation();
+
+                  if (position != null) {
+                    setState(() {
+                      latitude = position.latitude;
+                      longitude = position.longitude;
+                      locationAdded = true;
+                      locationMethod = "gps";
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Location set using GPS")),
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.map),
+                title: const Text("Select on Map"),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  final selected = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MapSelectionScreen(),
+                    ),
+                  );
+
+                  if (selected != null) {
+                    setState(() {
+                      latitude = selected.latitude;
+                      longitude = selected.longitude;
+                      locationAdded = true;
+                      locationMethod = "map";
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Location selected from map")),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
 
@@ -123,6 +194,11 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
       clinicaddressController.text = data['clinicAddress'] ?? "";
 
       phoneController.text = data['phone'] ?? "";
+
+      feeController.text = (data['fee'] ?? "").toString();
+      aboutController.text = data['about'] ?? "";
+
+
       
       final loadedImageUrl = data['imageUrl'] as String?;
       print('Loaded image URL from Firestore: $loadedImageUrl');
@@ -136,8 +212,10 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
           isEditMode = true;
         });
       }
-      latitude = data['latitude'];
-      longitude = data['longitude'];
+      latitude = data['latitude'] as double?;
+      longitude = data['longitude'] as double?;
+      locationMethod = data['locationMethod'];
+
 
       if (latitude != null && longitude != null) {
         locationAdded = true;
@@ -145,21 +223,7 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
     }
   }
 
-  Future<void> saveProfile() async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .update({
-      'name': nameController.text,
-      'specialization': specializationController.text,
-      'clinic': clinicController.text,
-      'experience': experienceController.text,
-      'registration': registrationController.text,
-      'clinicAddress': clinicaddressController.text,
-      'phone': phoneController.text,
-      'profileCompleted': true,
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -228,37 +292,29 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                 _buildTextField(clinicaddressController, "Clinic Address"),
                 const SizedBox(height: 10),
 
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    final position = await _getCurrentLocation();
-
-                    if (position != null) {
-                      setState(() {
-                        latitude = position.latitude;
-                        longitude = position.longitude;
-                        locationAdded = true;
-                      });
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Location added successfully")),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.location_on),
-                  label: Text(
-                    locationAdded ? "Location Added ✓" : "Add Clinic Location (Optional)",
+                ListTile(
+                  leading: const Icon(Icons.location_on, color: Colors.redAccent),
+                  title: const Text("Clinic Location"),
+                  subtitle: Text(
+                    locationAdded
+                        ? "Location set (${locationMethod ?? "unknown"})"
+                        : "Not set",
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    locationAdded ? Colors.green : Colors.redAccent,
-                    foregroundColor: Colors.white,
-                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: _openLocationOptions,
                 ),
+                _buildTextField(feeController, "Consultation Fee", keyboardType: TextInputType.number),
+                _buildTextField(aboutController, "About Doctor"),
+
+                const SizedBox(height: 10),
+
+
                 _buildTextField(
                   phoneController,
                   "Phone Number",
                   keyboardType: TextInputType.phone,
                 ),
+
                 const SizedBox(height: 30),
                 SizedBox(
                   width: double.infinity,
@@ -266,30 +322,38 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
   if (_formKey.currentState!.validate()) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
     final uploadedImageUrl = await uploadImage();
 
-    print("Uploaded image URL: $uploadedImageUrl");
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .set({
+    Map<String, dynamic> data = {
       'name': nameController.text,
       'specialization': specializationController.text,
       'clinic': clinicController.text,
+      'clinicAddress': clinicaddressController.text,
       'experience': experienceController.text,
       'registration': registrationController.text,
-      'clinicAddress': clinicaddressController.text,
       'phone': phoneController.text,
-      'imageUrl': uploadedImageUrl ?? "",
+      'fee': int.tryParse(feeController.text) ?? 0,
+      'about': aboutController.text,
+      'imageUrl': uploadedImageUrl ?? imageUrl ?? "",
       'profileCompleted': true,
+    };
+    if (latitude != null && longitude != null) {
+      data['latitude'] = latitude;
+      data['longitude'] = longitude;
+      data['locationMethod'] = locationMethod; // ✅ ADD THIS
+    }
 
-      // ✅ NEW (optional)
-      'latitude': latitude,
-      'longitude': longitude,
 
-    }, SetOptions(merge: true));
+    /// ✅ NOW SAVE
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set(data, SetOptions(merge: true));
+
+
 
     setState(() {
       imageUrl = uploadedImageUrl;

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uyir_maruthuvam_new/screens/Appointments/patient_view_doctor_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/widgets/notification_bell.dart';
-import 'package:uyir_maruthuvam_new/Notification_services/notification_services.dart';
-import '../patient_view_docter_screen.dart';
+
+import '../../../services/notification_services.dart';
+
+
 
 
 class HomeScreen extends StatefulWidget {

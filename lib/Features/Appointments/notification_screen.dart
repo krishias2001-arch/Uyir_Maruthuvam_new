@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'notification_services.dart';
+import 'package:uyir_maruthuvam_new/Services/notification_services.dart';
+
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});

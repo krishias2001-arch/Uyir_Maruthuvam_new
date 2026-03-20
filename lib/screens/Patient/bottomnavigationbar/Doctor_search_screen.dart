@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uyir_maruthuvam_new/screens/Patient/patient_view_docter_screen.dart';
+import 'package:uyir_maruthuvam_new/screens/Appointments/patient_view_doctor_screen.dart';
+
 
 
 class SearchScreen extends StatefulWidget {

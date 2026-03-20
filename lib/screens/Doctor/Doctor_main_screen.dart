@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_messages_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_home_screen.dart';
 import 'package:uyir_maruthuvam_new/screens/Doctor/bottomnavigationbar/doctor_schedule_screen.dart';
 import 'package:uyir_maruthuvam_new/main.dart';
@@ -23,8 +22,7 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
   Widget build(BuildContext context) {
     final List<Widget> _screens = [
       DoctorHomeScreen(onLogout: _onLogout),
-      DoctorMessagesScreen(),
-      DoctorScheduleScreen(),
+            DoctorScheduleScreen(),
     ];
     return Scaffold(
       backgroundColor: Colors.white,
@@ -46,7 +44,7 @@ class _DoctorMainScreenState extends State<DoctorMainScreen> {
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Messages"),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
             label: "Schedule",

@@ -7,10 +7,72 @@ import 'package:uyir_maruthuvam_new/screens/role_selection_screen.dart';
 import 'custom_button.dart';
 import 'custom_field.dart';
 import 'package:uyir_maruthuvam_new/auth_services/google_auth.dart';
+import 'package:uyir_maruthuvam_new/auth_services/otp_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   final VoidCallback onSignupTap;
+
   const LoginScreen({Key? key, required this.onSignupTap}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+
+}
+
+
+
+class _LoginScreenState extends State<LoginScreen> {
+
+  final TextEditingController phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    super.dispose();
+  }
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void sendOTP() async {
+    String phone = phoneController.text.trim();
+
+    if (phone.length != 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Enter valid 10-digit number")),
+      );
+      return;
+    }
+
+    await _auth.verifyPhoneNumber(
+      phoneNumber: '+91$phone',
+
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        await _auth.signInWithCredential(credential);
+
+
+          if (context.mounted) {
+            Navigator.of(context).maybePop();
+          } // optional
+
+      },
+
+      verificationFailed: (FirebaseAuthException e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? "Error")),
+        );
+      },
+
+      codeSent: (String verificationId, int? resendToken) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OTPScreen(verificationId: verificationId),
+          ),
+        );
+      },
+
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,23 +129,16 @@ class LoginScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         CustomTextField(
-                          icon: CupertinoIcons.mail,
-                          hint: 'Email',
+                          controller: phoneController,
+                          icon: CupertinoIcons.phone,
+                          hint: 'Phone Number',
                           gradientColors: [
                             Color(0xFF4A154B),
                             Color(0xFF6B1A6B),
                           ],
                         ),
                         SizedBox(height: 40),
-                        CustomTextField(
-                          icon: CupertinoIcons.lock,
-                          hint: 'Password',
-                          ispassword: true,
-                          gradientColors: [
-                            Color(0xFF4A154B),
-                            Color(0xFF6B1A6B),
-                          ],
-                        ),
+
                       ],
                     ),
                   ),
@@ -92,17 +147,11 @@ class LoginScreen extends StatelessWidget {
                     duration: Duration(milliseconds: 600),
                     delay: Duration(milliseconds: 400),
                     child: CustomButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RoleSelectionScreen(),
-                          ),
-                        );
-                      },
-                      text: 'Log In',
+                      onPressed: sendOTP,
+                      text: 'Send OTP',
                     ),
                   ),
+
                   SizedBox(height: 24),
                   FadeIn(
                     duration: Duration(milliseconds: 600),
@@ -115,7 +164,7 @@ class LoginScreen extends StatelessWidget {
                           style: TextStyle(color: Color(0xFF1D1C1D)),
                         ),
                         GestureDetector(
-                          onTap: onSignupTap,
+                          onTap: widget.onSignupTap,
                           child: Text(
                             'Sign Up',
                             style: TextStyle(
@@ -191,12 +240,7 @@ class LoginScreen extends StatelessWidget {
                                   try {
                                     UserCredential? result = await GoogleAuth().signInWithGoogle();
                                     if (result != null && context.mounted) {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => const RoleSelectionScreen(),
-                                        ),
-                                      );
+                                      // Do nothing — AuthGate will handle navigation
                                     }
                                   } catch (e) {
                                     if (context.mounted) {
@@ -231,10 +275,13 @@ class LoginScreen extends StatelessWidget {
                 ],
               ),
             ),
+                  ),
+            ),
           ),
-        ),
-      ),
-    );
+
+
+
+      );
   }
 }
 

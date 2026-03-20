@@ -9,10 +9,11 @@ class RoleSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset('images/logo.jpg', height: 100),
@@ -47,12 +48,18 @@ class RoleSelectionScreen extends StatelessWidget {
                   onPressed: () async {
                     final user = FirebaseAuth.instance.currentUser;
 
+                    if (user == null) return;
+
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(user!.uid)
-                        .update({
-                      'role': 'patient'
-                    });
+                        .set({
+                      'role': 'patient',
+                      'profileCompleted': false,
+                    }, SetOptions(merge: true));
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   },
                   child: const Text(
                     "Continue as Patient",
@@ -77,12 +84,18 @@ class RoleSelectionScreen extends StatelessWidget {
                   onPressed: () async {
                     final user = FirebaseAuth.instance.currentUser;
 
+                    if (user == null) return;
+
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(user!.uid)
-                        .update({
-                      'role': 'doctor'
-                    });
+                        .set({
+                      'role': 'doctor',
+                      'profileCompleted': false,
+                    }, SetOptions(merge: true));
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   },
                   child: const Text(
                     "Continue as Doctor",
@@ -94,6 +107,7 @@ class RoleSelectionScreen extends StatelessWidget {
           ),
         ),
       ),
+        ),
     );
   }
 }

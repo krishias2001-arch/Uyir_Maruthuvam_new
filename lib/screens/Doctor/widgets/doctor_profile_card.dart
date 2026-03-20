@@ -37,7 +37,7 @@ class _DoctorProfileCardState extends State<DoctorProfileCard> {
       height: 180,
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.blueAccent,
+        color: Colors.blueGrey,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 8)],
       ),

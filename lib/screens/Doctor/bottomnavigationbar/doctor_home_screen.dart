@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uyir_maruthuvam_new/common widget/language_selector.dart';
 import 'package:uyir_maruthuvam_new/auth_services/google_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uyir_maruthuvam_new/model/appointment_services.dart';
 class DoctorHomeScreen extends StatefulWidget {
   final VoidCallback? onLogout;
    const DoctorHomeScreen({super.key, this.onLogout});
@@ -104,8 +105,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                     .snapshots(),
                 builder: (context, snapshot) {
 
-                  if (!snapshot.hasData) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator();
+                  }
+
+                  if (!snapshot.hasData || !snapshot.data!.exists) {
+                    return const Center(child: Text("Profile not found"));
                   }
 
                   final data = snapshot.data!.data() as Map<String, dynamic>;
@@ -123,36 +128,33 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               const SizedBox(height: 10),
 
               StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('appointments')
-                    .where('doctorId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-                    .where('appointmentDate', isGreaterThanOrEqualTo: startOfDay)
-                    .where('appointmentDate', isLessThan: endOfDay)
-                    .snapshots(),
+                stream: AppointmentService.getAppointmentsForDate(
+                  doctorId: FirebaseAuth.instance.currentUser!.uid,
+                  date: DateTime.now(),
+                ),
                 builder: (context, snapshot) {
 
-                  if (!snapshot.hasData) {
-                    return const CircularProgressIndicator();
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
                   }
 
-                  int total = 0;
+                  if (snapshot.hasError) {
+                    return const Center(child: Text("Error loading appointments"));
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const TodaySummaryCard(total: 0, pending: 0, confirmed: 0);
+                  }
+
+                  int total = snapshot.data!.docs.length;
                   int pending = 0;
                   int confirmed = 0;
 
                   for (var doc in snapshot.data!.docs) {
-
                     final data = doc.data() as Map<String, dynamic>;
-                    final status = data['status'];
 
-                    total++;
-
-                    if (status == 'pending') {
-                      pending++;
-                    }
-
-                    if (status == 'confirmed') {
-                      confirmed++;
-                    }
+                    if (data['status'] == 'pending') pending++;
+                    if (data['status'] == 'confirmed') confirmed++;
                   }
 
                   return TodaySummaryCard(
@@ -161,7 +163,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                     confirmed: confirmed,
                   );
                 },
-              ),
+              )
 
             ],
           ),

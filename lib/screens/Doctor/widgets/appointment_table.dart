@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import 'package:uyir_maruthuvam_new/model/appointment_services.dart';
 class AppointmentTable extends StatelessWidget {
   final DateTime selectedDate;
   final String doctorId;
@@ -10,45 +11,37 @@ class AppointmentTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doctorId', isEqualTo: doctorId)
-          .snapshots(),
+      stream: AppointmentService.getAppointmentsForDate(
+        doctorId: doctorId,
+        date: selectedDate,
+      ),
       builder: (context, snapshot) {
 
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        var docs = snapshot.data!.docs;
-
-        // Filter appointments by selected date
-        var filteredDocs = docs.where((doc) {
-          var appointmentDate = (doc['date'] as Timestamp).toDate();
-          return appointmentDate.year == selectedDate.year &&
-                 appointmentDate.month == selectedDate.month &&
-                 appointmentDate.day == selectedDate.day;
-        }).toList();
-
-        if (filteredDocs.isEmpty) {
-          return const Center(
-            child: Text(
-              "No Appointments for this date",
-              style: TextStyle(fontSize: 16),
-            ),
-          );
+        if (snapshot.hasError) {
+          return const Center(child: Text("Error loading appointments"));
         }
 
-        return ListView.builder(
-          itemCount: filteredDocs.length,
-          itemBuilder: (context, index) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text("No Appointments for this date"),
+          );
+        }
+// Filter appointments by selected date
+        var docs = snapshot.data!.docs;
 
-            var data = filteredDocs[index];
-            var appointmentData = data.data();
-            
-            String patientId = appointmentData['patientId'] ?? '';
-            String time = appointmentData['time'] ?? '';
-            String status = appointmentData['status'] ?? 'pending';
+        return ListView.builder(
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            var doc = docs[index];
+            var data = docs[index].data() as Map<String, dynamic>;
+
+            String patientId = data['patientId'] ?? '';
+            String time = data['time'] ?? '';
+            String status = data['status'] ?? 'pending';
 
             return FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance
@@ -109,7 +102,7 @@ class AppointmentTable extends StatelessWidget {
                               // Update appointment status
                               await FirebaseFirestore.instance
                                   .collection('appointments')
-                                  .doc(data.id)
+                                  .doc(doc.id)
                                   .update({
                                 "status": "approved"
                               });
@@ -124,7 +117,7 @@ class AppointmentTable extends StatelessWidget {
                                 'timestamp': Timestamp.now(),
                                 'isRead': false,
                                 'type': 'appointment',
-                                'appointmentId': data.id,
+                                'appointmentId': doc.id,
                               });
                             },
                             style: ElevatedButton.styleFrom(
@@ -139,7 +132,7 @@ class AppointmentTable extends StatelessWidget {
                               // Update appointment status
                               await FirebaseFirestore.instance
                                   .collection('appointments')
-                                  .doc(data.id)
+                                  .doc(doc.id)
                                   .update({
                                 "status": "rejected"
                               });
@@ -154,7 +147,7 @@ class AppointmentTable extends StatelessWidget {
                                 'timestamp': Timestamp.now(),
                                 'isRead': false,
                                 'type': 'appointment',
-                                'appointmentId': data.id,
+                                'appointmentId': doc.id,
                               });
                             },
                             style: ElevatedButton.styleFrom(

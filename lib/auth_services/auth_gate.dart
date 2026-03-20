@@ -36,15 +36,25 @@ class AuthGate extends StatelessWidget {
               .snapshots(),
           builder: (context, roleSnapshot) {
 
-            if (!roleSnapshot.hasData) {
+            if (roleSnapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            final data =
-            roleSnapshot.data!.data() as Map<String, dynamic>?;
-            final role = data?['role'];
-            final profileCompleted = data?['profileCompleted'] ?? false;
+
+            if (roleSnapshot.hasError) {
+              return const Scaffold(
+                body: Center(child: Text("Something went wrong")),
+              );
+            }
+
+            if (!roleSnapshot.hasData || !roleSnapshot.data!.exists) {
+              return const RoleSelectionScreen();
+            }
+
+            final data = roleSnapshot.data!.data() as Map<String, dynamic>;
+            final role = data['role'];
+            final profileCompleted = data['profileCompleted'] ?? false;
 
             if (role == null) {
               return const RoleSelectionScreen();
@@ -64,7 +74,7 @@ class AuthGate extends StatelessWidget {
             }
 
             return PatientMainScreen(
-              username: data?['name'] ?? "User",
+              username: data['name'] ?? "User",
             );
           },
         );
