@@ -8,10 +8,10 @@ class DocterScreen extends StatelessWidget {
   const DocterScreen({super.key, required this.doctorId});
   
   static const List<String> imgs = [
-    "images/doctor1.jpg",
-    "images/doctor2.jpg",
-    "images/doctor3.jpg",
-    "images/doctor4.jpg",
+    "assets/images/doctor1.jpg",
+    "assets/images/doctor2.jpg",
+    "assets/images/doctor3.jpg",
+    "assets/images/doctor4.jpg",
   ];
 
   @override
@@ -48,7 +48,7 @@ class DocterScreen extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 40,
-                          backgroundImage: AssetImage("images/doctor1.jpg"),
+                          backgroundImage: AssetImage("assets/images/doctor1.jpg"),
                         ),
                         SizedBox(height: 15),
                         Text(

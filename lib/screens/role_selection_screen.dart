@@ -16,7 +16,7 @@ class RoleSelectionScreen extends StatelessWidget {
               child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('images/logo.jpg', height: 100),
+              Image.asset('assets/images/logo.jpg', height: 100),
               const SizedBox(height: 30),
               const Text(
                 "Welcome to Uyir Maruthuvam",

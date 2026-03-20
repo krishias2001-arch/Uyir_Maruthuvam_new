@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 import 'package:uyir_maruthuvam_new/auth_services/auth_gate.dart';
 import 'package:uyir_maruthuvam_new/services/notification_services.dart';
 import 'package:uyir_maruthuvam_new/welcome_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+
+import 'package:provider/provider.dart';
+import 'locale_provider.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,11 +22,26 @@ Future<void> main() async {
   } catch (e) {
     debugPrint("Initialization error: $e");
   }
+
   await NotificationService().init();
+
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.debug,
   );
-  runApp(const MyApp());
+
+  // ✅ CREATE provider
+  final localeProvider = LocaleProvider();
+
+  // ✅ LOAD saved language BEFORE UI starts
+  await localeProvider.loadLocale();
+
+  // ✅ PASS provider to app
+  runApp(
+    ChangeNotifierProvider.value(
+      value: localeProvider,
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -30,11 +50,7 @@ class MyApp extends StatefulWidget {
 
   const MyApp({super.key});
 
-  static void setLocale(BuildContext context, Locale locale) {
-    _MyAppState? state =
-    context.findAncestorStateOfType<_MyAppState>();
-    state?.changeLanguage(locale);
-  }
+
 
   static void restartApp() {
     final navigator = navigatorKey.currentState;
@@ -52,16 +68,16 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  Locale _locale = const Locale('en');
 
-  void changeLanguage(Locale locale) {
-    setState(() {
-      _locale = locale;
-    });
-  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
+
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return MaterialApp(
       navigatorKey: MyApp.navigatorKey,
       debugShowCheckedModeBanner: false,
@@ -70,11 +86,11 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,
-        primarySwatch: Colors.red,
-        scaffoldBackgroundColor: Colors.white,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
       ),
 
-      locale: _locale,
+      // ✅ USE provider here
+      locale: localeProvider.locale,
 
       supportedLocales: const [
         Locale('en'),
@@ -82,6 +98,8 @@ class _MyAppState extends State<MyApp> {
       ],
 
       localizationsDelegates: const [
+        // ⚠️ don't forget this if using ARB
+        // AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

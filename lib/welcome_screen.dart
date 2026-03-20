@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/auth_services/auth_gate.dart';
+import 'package:uyir_maruthuvam_new/locale_provider.dart';
 import 'package:uyir_maruthuvam_new/main.dart';
+import 'package:provider/provider.dart';
+
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -23,7 +26,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('images/welcome.jpg', height: 120),
+                Image.asset('assets/images/welcome.jpg', height: 120),
 
                 const SizedBox(height: 20),
 
@@ -62,11 +65,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               onSelected: (value) {
 
                 if (value == "en") {
-                  MyApp.setLocale(context, const Locale('en'));
+                  context.read<LocaleProvider>().setLocale('en');
                 }
 
                 if (value == "ta") {
-                  MyApp.setLocale(context, const Locale('ta'));
+                  context.read<LocaleProvider>().setLocale('ta');
                 }
 
               },

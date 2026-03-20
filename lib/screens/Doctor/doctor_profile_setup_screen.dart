@@ -283,10 +283,12 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                   experienceController,
                   "Years of Experience",
                   keyboardType: TextInputType.number,
+                  isOptional: true,
                 ),
                 _buildTextField(
                   registrationController,
                   "Medical Registration Number",
+                  isOptional: true,
                 ),
                 _buildTextField(clinicController, "Clinic / Hospital Name"),
                 _buildTextField(clinicaddressController, "Clinic Address"),
@@ -303,8 +305,8 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: _openLocationOptions,
                 ),
-                _buildTextField(feeController, "Consultation Fee", keyboardType: TextInputType.number),
-                _buildTextField(aboutController, "About Doctor"),
+                _buildTextField(feeController, "Consultation Fee", keyboardType: TextInputType.number, isOptional: true),
+                _buildTextField(aboutController, "About Doctor", isOptional: true),
 
                 const SizedBox(height: 10),
 
@@ -387,6 +389,7 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
     TextEditingController controller,
     String label, {
     TextInputType keyboardType = TextInputType.text,
+    bool isOptional = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -394,11 +397,11 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
         controller: controller,
         keyboardType: keyboardType,
         decoration: InputDecoration(
-          labelText: label,
+          labelText: isOptional ? "$label (Optional)" : label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         ),
         validator: (value) {
-          if (value == null || value.isEmpty) {
+          if (!isOptional && (value == null || value.isEmpty)) {
             return "Please enter $label";
           }
           return null;

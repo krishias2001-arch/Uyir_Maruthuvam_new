@@ -12,10 +12,10 @@ class PatientViewDocterScreen extends StatefulWidget {
   final String doctorId;
 
   static const List<String> imgs = [
-    "images/doctor1.jpg",
-    "images/doctor2.jpg",
-    "images/doctor3.jpg",
-    "images/doctor4.jpg",
+    "assets/images/doctor1.jpg",
+    "assets/images/doctor2.jpg",
+    "assets/images/doctor3.jpg",
+    "assets/images/doctor4.jpg",
   ];
 
   @override
@@ -23,7 +23,27 @@ class PatientViewDocterScreen extends StatefulWidget {
       _PatientViewDocterScreenState();
 }
 
-class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
+class _PatientViewDocterScreenState extends State<PatientViewDocterScreen>
+    with WidgetsBindingObserver {
+  Future<void> addReview({
+    required String doctorId,
+    required String patientName,
+    required String comment,
+    required double rating,
+  }) async {
+    if (comment.trim().isEmpty) return; // basic validation
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(doctorId)
+        .collection('reviews')
+        .add({
+      'patientName': patientName,
+      'comment': comment,
+      'rating': rating,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
   void _openLocationOptions(Map<String, dynamic> doctor) {
     final lat = doctor['latitude'];
     final lng = doctor['longitude'];
@@ -70,10 +90,23 @@ class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
                 onTap: () async {
                   Navigator.pop(context);
 
-                  final url =
-                      "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng";
+                  final lat = doctor['latitude'];
+                  final lng = doctor['longitude'];
 
-                  await launchUrl(Uri.parse(url));
+                  final Uri uri = Uri.parse(
+                    "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng",
+                  );
+
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication, // 🔥 VERY IMPORTANT
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Could not open Google Maps")),
+                    );
+                  }
                 },
               ),
             ],
@@ -81,6 +114,86 @@ class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
         );
       },
     );
+  }
+  void _showReviewDialog() {
+    TextEditingController commentController = TextEditingController();
+    double rating = 4;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Write Review"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: commentController,
+                decoration: InputDecoration(
+                  hintText: "Enter your review",
+                ),
+              ),
+              SizedBox(height: 10),
+
+              /// ⭐ Rating Dropdown
+              StatefulBuilder(
+                builder: (context, setState) {
+                  return DropdownButton<double>(
+                    value: rating,
+                    items: [1, 2, 3, 4, 5]
+                        .map((e) => DropdownMenuItem(
+                      value: e.toDouble(),
+                      child: Text("$e Stars"),
+                    ))
+                        .toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        rating = val!;
+                      });
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await addReview(
+                  doctorId: widget.doctorId,
+                  patientName: "Patient", // later replace with user name
+                  comment: commentController.text,
+                  rating: rating,
+                );
+
+                Navigator.pop(context);
+              },
+              child: Text("Submit"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        // 🔄 Force rebuild when returning from Maps
+      });
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -99,8 +212,16 @@ class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
             return const Center(child: Text("Error loading doctor data"));
           }
 
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text("Doctor not found"));
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (!snapshot.hasData || snapshot.data?.data() == null) {
+            return const Scaffold(
+              body: Center(child: Text("Reconnecting...")),
+            );
           }
 
           final data = snapshot.data!.data() as Map<String, dynamic>?;
@@ -121,7 +242,7 @@ class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
 
 
           return Scaffold(
-            backgroundColor: Colors.redAccent.withOpacity(0.8),
+            backgroundColor: Colors.orangeAccent.withOpacity(0.7),
             body: SingleChildScrollView(
               child: Column(
                 children: [
@@ -138,7 +259,7 @@ class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
                                 Navigator.pop(context);
                               },
                               child: Icon(
-                                Icons.more_vert,
+                                Icons.arrow_back_ios_new_outlined,
                                 size: 25,
                                 color: Colors.white,
                               ),
@@ -155,7 +276,7 @@ class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
                                 backgroundImage: (data?['imageUrl'] != null &&
                                     data!['imageUrl'].toString().isNotEmpty)
                                     ? NetworkImage(data['imageUrl'])
-                                    : AssetImage("images/doctor1.jpg") as ImageProvider,
+                                    : AssetImage("assets/images/doctor1.jpg") as ImageProvider,
                               ),
                               SizedBox(height: 15),
                               Text("Dr. $name",
@@ -168,7 +289,7 @@ class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
                               Text(
                                 available ? "Available Now" : "Doctor Offline",
                                 style: TextStyle(
-                                  color: available ? Colors.green : Colors.red,
+                                  color: available ? Colors.green : Colors.yellow,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -272,96 +393,84 @@ class _PatientViewDocterScreenState extends State<PatientViewDocterScreen> {
                             ),
                             SizedBox(width: 10),
                             Icon(Icons.star, color: Colors.amber),
-                            Text(
-                              "4.9",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                              ),
-                            ),
+                            Text(" "),
                             Spacer(),
+
+                            /// ✍️ WRITE REVIEW BUTTON
                             TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _showReviewDialog();
+                              },
                               child: Text(
-                                "See all",
+                                "Write Review",
                                 style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16,
                                   color: Colors.redAccent,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
                           ],
                         ),
                         SizedBox(
-                          height: 160,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: 4,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                margin: EdgeInsets.all(10),
-                                padding: EdgeInsets.symmetric(vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 4,
-                                      spreadRadius: 2,
+                          height: 180,
+                          child: StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(widget.doctorId)
+                                .collection('reviews')
+                                .orderBy('timestamp', descending: true)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+
+                              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                                return Center(child: Text("No reviews yet"));
+                              }
+
+                              final reviews = snapshot.data!.docs;
+
+                              return ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: reviews.length,
+                                itemBuilder: (context, index) {
+                                  final review = reviews[index];
+
+                                  return Container(
+                                    margin: EdgeInsets.all(10),
+                                    padding: EdgeInsets.all(10),
+                                    width: MediaQuery.of(context).size.width / 1.4,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(color: Colors.black12, blurRadius: 4),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                                child: SizedBox(
-                                  width: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width / 1.4,
-                                  child: Column(
-                                    children: [
-                                      ListTile(
-                                        leading: CircleAvatar(
-                                            radius: 25,
-                                            backgroundImage: AssetImage(
-                                                PatientViewDocterScreen
-                                                    .imgs[index])
-                                        ),
-                                        title: Text(
-                                          "Dr.Docter Name",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        ListTile(
+                                          leading: CircleAvatar(
+                                            child: Icon(Icons.person),
+                                          ),
+                                          title: Text(review['patientName'] ?? "Anonymous"),
+                                          subtitle: Text("Recent"),
+                                          trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.star, color: Colors.amber),
+                                              Text("${review['rating']}"),
+                                            ],
                                           ),
                                         ),
-                                        subtitle: Text("1 day ago"),
-                                        trailing: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment
-                                              .center,
-                                          children: [
-                                            Icon(Icons.star,
-                                                color: Colors.amber),
-                                            Text(
-                                              "4.9",
-                                              style: TextStyle(
-                                                  color: Colors.black54),
-                                            ),
-                                          ],
+                                        SizedBox(height: 5),
+                                        Text(
+                                          review['comment'] ?? "",
+                                          style: TextStyle(color: Colors.black54),
                                         ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        child: Text(
-                                          "Many thanks to Dr.Dear,He is a great and professional docter",
-                                          style: TextStyle(
-                                              color: Colors.black54),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ),
