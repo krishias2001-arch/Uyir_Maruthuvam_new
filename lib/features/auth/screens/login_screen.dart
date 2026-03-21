@@ -3,6 +3,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uyir_maruthuvam_new/features/auth/auth_gate.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 
 import '../widgets/custom_button.dart';
@@ -242,7 +243,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   try {
                                     UserCredential? result = await GoogleAuth().signInWithGoogle();
                                     if (result != null && context.mounted) {
-                                      // Do nothing — AuthGate will handle navigation
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const AuthGate()),
+                                      );
                                     }
                                   } catch (e) {
                                     if (context.mounted) {

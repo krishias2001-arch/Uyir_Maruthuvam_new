@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uyir_maruthuvam_new/features/role/role_selection_screen.dart';
+import 'package:uyir_maruthuvam_new/features/auth/auth_gate.dart';
 
 
 class OTPScreen extends StatefulWidget {
@@ -41,7 +41,7 @@ class _OTPScreenState extends State<OTPScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (_) => const RoleSelectionScreen(),
+          builder: (_) => const AuthGate(),
         ),
             (route) => false,
       );
