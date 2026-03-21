@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import 'package:uyir_maruthuvam_new/auth_services/auth_gate.dart';
-import 'package:uyir_maruthuvam_new/services/notification_services.dart';
-import 'package:uyir_maruthuvam_new/welcome_screen.dart';
+import 'package:uyir_maruthuvam_new/features/auth/auth_gate.dart';
+import 'package:uyir_maruthuvam_new/core/services/notification_services.dart';
+import 'package:uyir_maruthuvam_new/features/auth/screens/welcome_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 
 import 'package:provider/provider.dart';
-import 'locale_provider.dart';
+import 'providers/locale_provider.dart';
 import 'l10n/app_localizations.dart';
 
 
