@@ -61,7 +61,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
       }
     } else {
       final dayName = DateFormat('EEEE').format(_selectedDay!).toLowerCase();
-      final schedule = doctorData!['clinicSchedule'];
+      final schedule = doctorData!['weeklySchedule'];
       if (schedule != null && schedule[dayName] != null) {
         activeSlots = List<Map<String, String>>.from(
           (schedule[dayName] as List).map((item) => Map<String, String>.from(item))

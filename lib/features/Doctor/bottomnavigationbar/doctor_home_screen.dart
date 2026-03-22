@@ -121,6 +121,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                     specialization: data['specialization'] ?? '',
                     imageUrl: data['imageUrl'] ?? '',
                     isAvailable: data['isAvailable'] ?? false,
+                    clinicTiming: data['clinicTiming'] ?? {},
                   );
                 },
               ),

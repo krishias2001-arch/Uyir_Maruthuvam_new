@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/features/patient/bottomnavigationbar/doctor_search_screen.dart';
 import 'package:uyir_maruthuvam_new/features/patient/patient_profile_screen.dart';
+import 'package:uyir_maruthuvam_new/features/patient/patient_profile_setup_screen.dart';
 import 'package:uyir_maruthuvam_new/features/patient/patient_storage_screen.dart';
 import 'package:uyir_maruthuvam_new/features/auth/services/google_auth.dart';
 import 'bottomnavigationbar/patient_home_screen.dart';
@@ -86,7 +87,7 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const PatientProfileScreen(),
+                    builder: (_) => const PatientProfileSetupScreen(),
                   ),
                 );
               },

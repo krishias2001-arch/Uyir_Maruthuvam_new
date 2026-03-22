@@ -18,13 +18,16 @@ class DoctorProfileSetupScreen extends StatefulWidget {
 class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
   bool isEditMode = false;
   String? locationMethod; // "gps" or "map"
-
+  bool _isValidTimeRange(TimeOfDay start, TimeOfDay end) {
+    return (end.hour > start.hour) ||
+        (end.hour == start.hour && end.minute > start.minute);
+  }
 
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController specializationController =
-      TextEditingController();
+  TextEditingController();
   final TextEditingController experienceController = TextEditingController();
   final TextEditingController registrationController = TextEditingController();
   final TextEditingController clinicController = TextEditingController();
@@ -39,12 +42,41 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
   double? latitude;
   double? longitude;
   bool locationAdded = false;
+  String timingMode = 'standard'; // 'standard' or 'custom'
+  Map<String, dynamic> clinicTiming = {
+    'mode': 'standard',
+    'standard': {
+      'start': '09:00',
+      'end': '17:00',
+      'days': ['monday', 'tuesday', 'wednesday']
+    },
+    'custom': {
+      'monday': [],
+      'tuesday': [],
+      'wednesday': [],
+      'thursday': [],
+      'friday': [],
+      'saturday': [],
+      'sunday': [],
+    }
+  };
+
+  final List<String> _days = [
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday'
+  ];
 
   @override
   void initState() {
     super.initState();
     loadProfile();
   }
+
   void _openLocationOptions() {
     showModalBottomSheet(
       context: context,
@@ -98,7 +130,8 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                     });
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Location selected from map")),
+                      const SnackBar(
+                          content: Text("Location selected from map")),
                     );
                   }
                 },
@@ -109,7 +142,80 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
       },
     );
   }
+  void _openDayEditor(String day) {
+    final overrides =
+    clinicTiming['custom'][day] as List<Map<String, String>>;
 
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return SizedBox(
+          height: 400,
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Text(day.capitalize(),
+                  style: const TextStyle(fontSize: 18)),
+
+              ...overrides.asMap().entries.map((entry) {
+                final index = entry.key;
+                final slot = entry.value;
+
+                return ListTile(
+                  title: Text("${slot['start']} - ${slot['end']}"),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      setState(() {
+                        clinicTiming['custom'][day].removeAt(index);
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                );
+              }),
+
+              ElevatedButton(
+                onPressed: () async {
+                  final start = await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 9, minute: 0),
+                  );
+                  if (start == null) return;
+
+                  final end = await showTimePicker(
+                    context: context,
+                    initialTime:
+                    TimeOfDay(hour: start.hour + 1, minute: start.minute),
+                  );
+                  if (end == null) return;
+
+                  if (!_isValidTimeRange(start, end)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Invalid time range")),
+                    );
+                    return;
+                  }
+
+                  setState(() {
+                    clinicTiming['custom'][day].add({
+                      'start':
+                      "${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')}",
+                      'end':
+                      "${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}",
+                    });
+                  });
+
+                  Navigator.pop(context);
+                },
+                child: const Text("Add Slot"),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Future<Position?> _getCurrentLocation() async {
     bool serviceEnabled;
@@ -141,6 +247,7 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
       desiredAccuracy: LocationAccuracy.high,
     );
   }
+
   Future<void> pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
@@ -150,6 +257,7 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
       });
     }
   }
+
   Future<String?> uploadImage() async {
     if (_image == null) return imageUrl;
 
@@ -172,18 +280,18 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
       print("Download URL: $downloadUrl");
 
       return downloadUrl;
-
     } catch (e) {
       print("UPLOAD ERROR: $e");
       return null;
     }
   }
+
   Future<void> loadProfile() async {
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .get();
-    
+
     final data = userDoc.data();
     if (data != null) {
       nameController.text = data['name'] ?? "";
@@ -199,10 +307,9 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
       aboutController.text = data['about'] ?? "";
 
 
-      
       final loadedImageUrl = data['imageUrl'] as String?;
       print('Loaded image URL from Firestore: $loadedImageUrl');
-      
+
       setState(() {
         imageUrl = loadedImageUrl;
       });
@@ -216,13 +323,31 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
       longitude = data['longitude'] as double?;
       locationMethod = data['locationMethod'];
 
+      if (data['clinicTiming'] != null) {
+        clinicTiming = Map<String, dynamic>.from(data['clinicTiming']);
+
+        // ✅ ADD THIS LINE (missing)
+        timingMode = clinicTiming['mode'] ?? 'standard';
+
+        clinicTiming['custom'] =
+        Map<String, List<Map<String, String>>>.from(
+          (clinicTiming['custom'] as Map).map(
+                (key, value) => MapEntry(
+              key,
+              (value as List)
+                  .map((e) => Map<String, String>.from(e))
+                  .toList(),
+            ),
+          ),
+        );
+      }
+
 
       if (latitude != null && longitude != null) {
         locationAdded = true;
       }
     }
   }
-
 
 
   @override
@@ -257,20 +382,23 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                                 fit: BoxFit.cover,
                               ),
                             )
-                          else if (imageUrl != null && imageUrl!.isNotEmpty)
-                            ClipOval(
-                              child: Image.network(
-                                imageUrl!,
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.person, size: 40, color: Colors.grey);
-                                },
-                              ),
-                            )
                           else
-                            const Icon(Icons.camera_alt, size: 40, color: Colors.white),
+                            if (imageUrl != null && imageUrl!.isNotEmpty)
+                              ClipOval(
+                                child: Image.network(
+                                  imageUrl!,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(Icons.person, size: 40,
+                                        color: Colors.grey);
+                                  },
+                                ),
+                              )
+                            else
+                              const Icon(Icons.camera_alt, size: 40,
+                                  color: Colors.white),
                         ],
                       ),
                     ),
@@ -295,7 +423,8 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                 const SizedBox(height: 10),
 
                 ListTile(
-                  leading: const Icon(Icons.location_on, color: Colors.redAccent),
+                  leading: const Icon(
+                      Icons.location_on, color: Colors.redAccent),
                   title: const Text("Clinic Location"),
                   subtitle: Text(
                     locationAdded
@@ -305,10 +434,18 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: _openLocationOptions,
                 ),
-                _buildTextField(feeController, "Consultation Fee", keyboardType: TextInputType.number, isOptional: true),
-                _buildTextField(aboutController, "About Doctor", isOptional: true),
+                _buildTextField(feeController, "Consultation Fee",
+                    keyboardType: TextInputType.number, isOptional: true),
+                _buildTextField(
+                    aboutController, "About Doctor", isOptional: true),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
+
+
+                // Timing Type Selection
+                _buildClinicTiming(),
+
+                const SizedBox(height: 20),
 
 
                 _buildTextField(
@@ -323,55 +460,63 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () async {
-  if (_formKey.currentState!.validate()) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+                      if (_formKey.currentState!.validate()) {
+                        if (timingMode == 'standard' &&
+                            clinicTiming['standard']['days'].isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Select at least one working day")),
+                          );
+                          return;
+                        }
 
-    final uploadedImageUrl = await uploadImage();
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user == null) return;
 
-    Map<String, dynamic> data = {
-      'name': nameController.text,
-      'specialization': specializationController.text,
-      'clinic': clinicController.text,
-      'clinicAddress': clinicaddressController.text,
-      'experience': experienceController.text,
-      'registration': registrationController.text,
-      'phone': phoneController.text,
-      'fee': int.tryParse(feeController.text) ?? 0,
-      'about': aboutController.text,
-      'imageUrl': uploadedImageUrl ?? imageUrl ?? "",
-      'profileCompleted': true,
-    };
-    if (latitude != null && longitude != null) {
-      data['latitude'] = latitude;
-      data['longitude'] = longitude;
-      data['locationMethod'] = locationMethod; // ✅ ADD THIS
-    }
+                        final uploadedImageUrl = await uploadImage();
 
-
-    /// ✅ NOW SAVE
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .set(data, SetOptions(merge: true));
+                        Map<String, dynamic> data = {
+                          'name': nameController.text,
+                          'specialization': specializationController.text,
+                          'clinic': clinicController.text,
+                          'clinicAddress': clinicaddressController.text,
+                          'clinicTiming': clinicTiming,
+                          'experience': experienceController.text,
+                          'registration': registrationController.text,
+                          'phone': phoneController.text,
+                          'fee': int.tryParse(feeController.text) ?? 0,
+                          'about': aboutController.text,
+                          'imageUrl': uploadedImageUrl ?? imageUrl ?? "",
+                          'profileCompleted': true,
+                        };
+                        if (latitude != null && longitude != null) {
+                          data['latitude'] = latitude;
+                          data['longitude'] = longitude;
+                          data['locationMethod'] = locationMethod; // ✅ ADD THIS
+                        }
 
 
+                        /// ✅ NOW SAVE
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(user.uid)
+                            .set(data, SetOptions(merge: true));
 
-    setState(() {
-      imageUrl = uploadedImageUrl;
-    });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          locationAdded
-              ? "Profile saved with location"
-              : "Profile saved (add location later for map visibility)",
-        ),
-      ),
-    );
-  }
-},
+                        setState(() {
+                          imageUrl = uploadedImageUrl;
+                        });
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              locationAdded
+                                  ? "Profile saved with location"
+                                  : "Profile saved (add location later for map visibility)",
+                            ),
+                          ),
+                        );
+                      }
+                    },
                     child: Text(
                       isEditMode ? "Save Changes" : "Save & Continue",
                     ),
@@ -385,12 +530,11 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label, {
-    TextInputType keyboardType = TextInputType.text,
-    bool isOptional = false,
-  }) {
+  Widget _buildTextField(TextEditingController controller,
+      String label, {
+        TextInputType keyboardType = TextInputType.text,
+        bool isOptional = false,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
@@ -408,5 +552,188 @@ class _DoctorProfileSetupScreenState extends State<DoctorProfileSetupScreen> {
         },
       ),
     );
+  }
+
+
+
+
+  Widget _buildStandardTimingUI() {
+    final standard = clinicTiming['standard'];
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.access_time),
+                SizedBox(width: 8),
+                Text(
+                  "Standard Timing (Same for all days)",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            /// TIME PICKERS
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () async {
+                    final start = await showTimePicker(
+                      context: context,
+                      initialTime: const TimeOfDay(hour: 9, minute: 0),
+                    );
+                    if (start == null) return;
+
+                    final end = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay(
+                          hour: start.hour + 1, minute: start.minute),
+                    );
+                    if (end == null) return;
+
+                    if (!_isValidTimeRange(start, end)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Invalid time range")),
+                      );
+                      return;
+                    }
+
+                    setState(() {
+                      standard['start'] =
+                      "${start.hour.toString().padLeft(2, '0')}:${start.minute
+                          .toString().padLeft(2, '0')}";
+                      standard['end'] =
+                      "${end.hour.toString().padLeft(2, '0')}:${end.minute
+                          .toString().padLeft(2, '0')}";
+                    });
+                  },
+                  child: Text(
+                    "${standard['start']} - ${standard['end']}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+
+            const Divider(),
+
+            /// DAYS SELECTOR
+            Wrap(
+              spacing: 8,
+              children: _days.map((day) {
+                final isSelected = standard['days'].contains(day);
+
+                return FilterChip(
+                  label: Text(day.capitalize().substring(0, 3)),
+                  selected: isSelected,
+                  onSelected: (val) {
+                    setState(() {
+                      if (val) {
+                        standard['days'].add(day);
+                      } else {
+                        standard['days'].remove(day);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _buildClinicTiming() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Clinic Timing",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(height: 10),
+
+        /// 🔘 TOGGLE
+        Row(
+          children: [
+            Expanded(
+              child: ChoiceChip(
+                label: const Text("Standard"),
+                selected: timingMode == 'standard',
+                  onSelected: (_) {
+                    if (timingMode == 'custom') {
+                      // switching to standard
+                      // optional: show dialog
+                    }
+
+                    setState(() {
+                      timingMode = 'standard';
+                      clinicTiming['mode'] = 'standard';
+                    });
+                  }
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ChoiceChip(
+                label: const Text("Custom"),
+                selected: timingMode == 'custom',
+                onSelected: (_) {
+                  setState(() {
+                    timingMode = 'custom';
+                    clinicTiming['mode'] = 'custom';
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        /// 👇 CONDITIONAL UI
+        timingMode == 'standard'
+            ? _buildStandardTimingUI()
+            : _buildCustomTimingUI(),
+      ],
+    );
+  }
+  Widget _buildCustomTimingUI() {
+    final custom = clinicTiming['custom'] as Map<String, dynamic>;
+
+    return Column(
+      children: custom.keys.map((day) {
+        final slots = custom[day] as List;
+
+        return Card(
+          child: ListTile(
+            title: Text(day.capitalize()),
+            subtitle: Text(
+              slots.isEmpty
+                  ? "Closed"
+                  : slots.map((s) => "${s['start']}-${s['end']}").join(", "),
+            ),
+            trailing: const Icon(Icons.edit),
+            onTap: () => _openDayEditor(day),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+
+}// end of _DoctorProfileSetupScreenState
+extension StringExtension on String {
+  String capitalize() {
+    if (isEmpty) return this;
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

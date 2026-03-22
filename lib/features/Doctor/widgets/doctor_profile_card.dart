@@ -9,6 +9,8 @@ class DoctorProfileCard extends StatefulWidget {
   final String specialization;
   final String imageUrl;
   final bool isAvailable;
+  final Map<String, dynamic> clinicTiming;
+
 
   const DoctorProfileCard({
   super.key,
@@ -17,6 +19,7 @@ class DoctorProfileCard extends StatefulWidget {
   required this.specialization,
   required this.imageUrl,
   required this.isAvailable,
+    required this.clinicTiming,
   });
   @override
   State<DoctorProfileCard> createState() => _DoctorProfileCardState();
@@ -24,6 +27,50 @@ class DoctorProfileCard extends StatefulWidget {
 
 class _DoctorProfileCardState extends State<DoctorProfileCard> {
   late bool isAvailable;
+  String getTodayClinicTime() {
+    final timing = widget.clinicTiming;
+
+    if (timing == null || timing.isEmpty) {
+      return "Closed Today";
+    }
+
+    final mode = timing['mode'] ?? 'standard';
+
+    // 🔴 Fix weekday mapping correctly
+    final now = DateTime.now();
+    final days = [
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+      'sunday'
+    ];
+    final today = days[now.weekday - 1]; // ✅ correct mapping
+
+    if (mode == 'standard') {
+      final standard = timing['standard'] ?? {};
+      final workingDays = List<String>.from(standard['days'] ?? []);
+
+      if (!workingDays.contains(today)) {
+        return "Closed Today";
+      }
+
+      return "${standard['start']} - ${standard['end']}";
+    } else {
+      final custom = timing['custom'] ?? {};
+      final slots = List<Map<String, dynamic>>.from(custom[today] ?? []);
+
+      if (slots.isEmpty) {
+        return "Closed Today";
+      }
+
+      return slots
+          .map((s) => "${s['start']}-${s['end']}")
+          .join(", ");
+    }
+  }
 
   @override
   void initState() {
@@ -33,6 +80,7 @@ class _DoctorProfileCardState extends State<DoctorProfileCard> {
 
   @override
   Widget build(BuildContext context) {
+    final todayTime = getTodayClinicTime();
     return Container(
       height: 180,
       margin: const EdgeInsets.all(8),
@@ -42,7 +90,24 @@ class _DoctorProfileCardState extends State<DoctorProfileCard> {
         boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 8)],
       ),
       child: Stack(
-        children: [
+        children: [//clinic time
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                todayTime,
+                style: TextStyle(
+                  color: todayTime == "Closed Today" ? Colors.red : Colors.green,
+                ),
+              ),
+            ),
+          ),
           // 🔹 Circle Avatar (Top Left)
           Positioned(
             top: 16,
