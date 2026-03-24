@@ -30,7 +30,7 @@ class _DoctorProfileCardState extends State<DoctorProfileCard> {
   String getTodayClinicTime() {
     final timing = widget.clinicTiming;
 
-    if (timing == null || timing.isEmpty) {
+    if (timing.isEmpty) {
       return "Closed Today";
     }
 

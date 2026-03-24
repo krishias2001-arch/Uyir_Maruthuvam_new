@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:uyir_maruthuvam_new/features/Patient/screens/addreviewbottomsheet.dart';
 import 'package:uyir_maruthuvam_new/features/appointments/appointment_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 
 class PatientViewDoctorScreen extends StatefulWidget {
   final String doctorId;
@@ -66,25 +66,29 @@ class _PatientViewDoctorScreenState extends State<PatientViewDoctorScreen> {
   }
   Future<void> fetchReviews() async {
     try {
-      final currentUserId = FirebaseAuth.instance.currentUser!.uid;
-
       final snapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.doctorId)
           .collection('reviews')
-          .where('patientId', isEqualTo: currentUserId)
           .orderBy('timestamp', descending: true)
           .get();
 
-      reviews = snapshot.docs.map((doc) => doc.data()).toList();
+      reviews = snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          ...doc.data(),
+        };
+      }).toList();
 
-      // average calculation
+      // ⭐ average calculation (all users)
       if (reviews.isNotEmpty) {
         double total = 0;
         for (var r in reviews) {
           total += (r['rating'] as num?)?.toDouble() ?? 0;
         }
         averageRating = total / reviews.length;
+      } else {
+        averageRating = 0;
       }
 
       setState(() {});
@@ -272,9 +276,7 @@ class _PatientViewDoctorScreenState extends State<PatientViewDoctorScreen> {
                       SizedBox(width: 10),
                       Icon(Icons.star, color: Colors.amber),
               Text(
-                reviews.isEmpty
-                    ? "No rating"
-                    : averageRating.toStringAsFixed(1),
+                reviews.isEmpty ? "0.0" : averageRating.toStringAsFixed(1),
                    style: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 16,

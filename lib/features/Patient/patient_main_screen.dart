@@ -1,8 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:uyir_maruthuvam_new/features/Patient/patient_profile_screen_setup.dart';
 import 'package:uyir_maruthuvam_new/features/patient/bottomnavigationbar/doctor_search_screen.dart';
-import 'package:uyir_maruthuvam_new/features/patient/patient_profile_screen.dart';
-import 'package:uyir_maruthuvam_new/features/patient/patient_profile_setup_screen.dart';
 import 'package:uyir_maruthuvam_new/features/patient/patient_storage_screen.dart';
 import 'package:uyir_maruthuvam_new/features/auth/services/google_auth.dart';
 import 'bottomnavigationbar/patient_home_screen.dart';
@@ -10,8 +10,8 @@ import 'bottomnavigationbar/schedule_screen.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 
 class PatientMainScreen extends StatefulWidget {
-  final String username;
-  const PatientMainScreen({super.key, required this.username});
+
+   PatientMainScreen({super.key, required this.username});
 
   @override
   State<PatientMainScreen> createState() => _PatientMainScreenState();
@@ -19,7 +19,7 @@ class PatientMainScreen extends StatefulWidget {
 
 class _PatientMainScreenState extends State<PatientMainScreen> {
   int _selectedIndex = 0;
-
+  final user = FirebaseAuth.instance.currentUser;
   late List<Widget> _screens;
 
   @override
@@ -27,7 +27,7 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
     super.initState();
 
     _screens = [
-      PatientHomeScreen(username: widget.username),
+      PatientHomeScreen(),
       const DoctorSearchScreen(),
       const ScheduleScreen(),
     ];
@@ -69,69 +69,80 @@ class _PatientMainScreenState extends State<PatientMainScreen> {
       ),
       appBar: AppBar(title: const Text("Uyir Maruthuvam")),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(l10n.patientName),
-              accountEmail: const Text("patient@email.com"),
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, size: 40, color: Colors.redAccent),
+        child: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
+                accountName: Text(user?.displayName ?? "No Name"),
+                accountEmail: Text(user?.email ?? "No Email"),
+                currentAccountPicture: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage: user?.photoURL != null
+                      ? NetworkImage(user!.photoURL!)
+                      : null,
+                  child: user?.photoURL == null
+                      ? const Icon(Icons.person, size: 40, color: Colors.redAccent)
+                      : null,
+                ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: Text(l10n.profile),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PatientProfileSetupScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: Text(l10n.settings),
-              onTap: () {
-                // Navigate to settings screen
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: Text(l10n.medicalRecords),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PatientStorageScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.medical_information),
-              title: Text(l10n.medicalHistory),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PatientStorageScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: Text(l10n.logout),
-              onTap: () async {
-                await GoogleAuth().signOut();
-              },
-            ),
-          ],
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: Text(l10n.profile),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PatientProfileScreenSetup(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: Text(l10n.settings),
+                onTap: () {
+                  // Navigate to settings screen
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: Text(l10n.medicalRecords),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PatientStorageScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.medical_information),
+                title: Text(l10n.medicalHistory),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PatientStorageScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: Text(l10n.logout),
+                onTap: () async {
+                  await GoogleAuth().signOut();
+                },
+              ),
+              const SizedBox(height: 20),
+
+            ],
+          ),
         ),
+
       ),
     );
   }

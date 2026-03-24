@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uyir_maruthuvam_new/core/services/patient_services.dart';
+import 'package:uyir_maruthuvam_new/data/models/patient_model.dart';
 
 import 'package:uyir_maruthuvam_new/features/doctor/widgets/notification_bell.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
@@ -7,21 +9,32 @@ import 'package:uyir_maruthuvam_new/features/patient/patient_view_doctor_screen.
 import '../../../core/services/notification_services.dart';
 
 class PatientHomeScreen extends StatefulWidget {
-  final String username;
 
-  PatientHomeScreen({super.key, required this.username});
+
+  PatientHomeScreen({super.key, });
 
   @override
   State<PatientHomeScreen> createState() => _PatientHomeScreenState();
 }
 
 class _PatientHomeScreenState extends State<PatientHomeScreen> {
-
+  late Future<PatientModel?> _patientFuture;
   final NotificationService _notificationService = NotificationService();
+  @override
+  void initState() {
+    super.initState();
 
+    final uid = _notificationService.getCurrentUserId();
+
+    if (uid != null) {
+      _patientFuture = PatientService().getPatient(uid);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final uid = _notificationService.getCurrentUserId();
+
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 30),
@@ -44,12 +57,27 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 15),
-                      Text(
-                        l10n.hello(widget.username),
-                        style: const TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      FutureBuilder<PatientModel?>(
+                        future: uid != null ? PatientService().getPatient(uid) : null,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Text("Loading...");
+                          }
+
+                          if (!snapshot.hasData || snapshot.data == null) {
+                            return const Text("Hello");
+                          }
+
+                          final patient = snapshot.data!;
+
+                          return Text(
+                            l10n.hello(patient.name),
+                            style: const TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
+                        },
                       ),
                       const Spacer(),
                       StreamBuilder<int>(
