@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:uyir_maruthuvam_new/features/Patient/patient_profile_screen_setup.dart';
 import 'package:uyir_maruthuvam_new/features/auth/screens/login_screen.dart';
 import 'package:uyir_maruthuvam_new/features/doctor/screens/doctor_main_screen.dart';
 import 'package:uyir_maruthuvam_new/features/doctor/screens/doctor_profile_setup_screen.dart';
-import 'package:uyir_maruthuvam_new/features/patient/patient_main_screen.dart';
+import 'package:uyir_maruthuvam_new/features/patient/screens/patient_main_screen.dart';
 import 'package:uyir_maruthuvam_new/features/role/role_selection_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../patient/screens/patient_profile_screen_setup.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -73,9 +74,7 @@ class AuthGate extends StatelessWidget {
               return const DoctorMainScreen();
             }
 
-            return PatientMainScreen(
-              username: data['name'] ?? "User",
-            );
+            return PatientMainScreen();
           },
         );
       },

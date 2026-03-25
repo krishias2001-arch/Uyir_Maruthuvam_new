@@ -1,17 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:uyir_maruthuvam_new/features/Patient/patient_profile_screen_setup.dart';
-import 'package:uyir_maruthuvam_new/features/patient/bottomnavigationbar/doctor_search_screen.dart';
-import 'package:uyir_maruthuvam_new/features/patient/patient_storage_screen.dart';
+import 'package:uyir_maruthuvam_new/features/patient/bottomnavigationbar/patient_home_screen.dart';
+import 'package:uyir_maruthuvam_new/features/Patient/bottomnavigationbar/schedule_screen.dart';
+import 'package:uyir_maruthuvam_new/features/patient/screens/patient_storage_screen.dart';
 import 'package:uyir_maruthuvam_new/features/auth/services/google_auth.dart';
-import 'bottomnavigationbar/patient_home_screen.dart';
-import 'bottomnavigationbar/schedule_screen.dart';
+import 'package:uyir_maruthuvam_new/features/patient/screens/patient_profile_screen_setup.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
+
+import '../bottomnavigationbar/Doctor_search_screen.dart';
 
 class PatientMainScreen extends StatefulWidget {
 
-   PatientMainScreen({super.key, required this.username});
+  const PatientMainScreen({super.key });
 
   @override
   State<PatientMainScreen> createState() => _PatientMainScreenState();

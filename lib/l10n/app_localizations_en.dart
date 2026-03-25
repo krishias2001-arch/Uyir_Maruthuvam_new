@@ -68,7 +68,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectRole => 'Please select your role to continue';
 
   @override
-  String get continueAsPatient => 'Continue as Patient';
+  String get continueAsPatient => 'Continue as patient';
 
   @override
   String get continueAsDoctor => 'Continue as Doctor';
@@ -161,7 +161,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePassword => 'Change Password';
 
   @override
-  String get patientName => 'Patient Name';
+  String get patientName => 'patient Name';
 
   @override
   String get language => 'Language';

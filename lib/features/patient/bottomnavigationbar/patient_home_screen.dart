@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uyir_maruthuvam_new/core/services/patient_services.dart';
 import 'package:uyir_maruthuvam_new/data/models/patient_model.dart';
-
-import 'package:uyir_maruthuvam_new/features/doctor/widgets/notification_bell.dart';
+import 'package:uyir_maruthuvam_new/features/appointments/screens/notification_screen.dart';
+import 'dart:io';
+import 'package:uyir_maruthuvam_new/features/patient/screens/patient_view_doctor_screen.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
-import 'package:uyir_maruthuvam_new/features/patient/patient_view_doctor_screen.dart';
 import '../../../core/services/notification_services.dart';
 
 class PatientHomeScreen extends StatefulWidget {
@@ -18,7 +18,9 @@ class PatientHomeScreen extends StatefulWidget {
 }
 
 class _PatientHomeScreenState extends State<PatientHomeScreen> {
-  late Future<PatientModel?> _patientFuture;
+  File? _imageFile;
+  String? imageUrl;
+  Future<PatientModel?>? _patientFuture;
   final NotificationService _notificationService = NotificationService();
   @override
   void initState() {
@@ -33,7 +35,6 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final uid = _notificationService.getCurrentUserId();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -50,15 +51,21 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: Row(
                     children: [
-                      const CircleAvatar(
+                       CircleAvatar(
                         radius: 30,
-                        backgroundImage: AssetImage(
-                          "assets/images/patient_profile.jpg",
-                        ),
+                        backgroundColor: Colors.redAccent,
+                        backgroundImage: _imageFile != null
+                            ? FileImage(_imageFile!)
+                            : (imageUrl != null && imageUrl!.isNotEmpty
+                            ? NetworkImage(imageUrl!) as ImageProvider
+                            : null),
+                        child: (_imageFile == null && (imageUrl == null || imageUrl!.isEmpty))
+                            ? const Icon(Icons.person, size: 50, color: Colors.white)
+                            : null,
                       ),
                       const SizedBox(width: 15),
                       FutureBuilder<PatientModel?>(
-                        future: uid != null ? PatientService().getPatient(uid) : null,
+                        future: _patientFuture,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Text("Loading...");
@@ -94,7 +101,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const NotificationBell(),
+                                      builder: (context) => const NotificationScreen(),
                                     ),
                                   );
                                 },
@@ -211,7 +218,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                     String doctorId = doctors[index].id;
                     String doctorName = doctorData['name'] ?? 'Unknown Doctor';
                     String specialization = doctorData['specialization'] ?? 'General';
-
+                    String? imageUrl = doctorData['imageUrl'];
                     return Container(
                       height: 320,
                       width: 200,
@@ -255,11 +262,19 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                                       height: 160,
                                       width: 200,
                                       color: Colors.grey[300],
-                                      child: Icon(
-                                        Icons.person,
-                                        size: 80,
-                                        color: Colors.grey[600],
-                                      ),
+
+                                  child: (imageUrl != null && imageUrl.isNotEmpty)
+                                      ? Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  )
+                                      : const Icon(
+                                    Icons.person,
+                                    size: 20,
+                                    color: Colors.grey,
+                                  ),
                                     ),
                                   ),
                                 ),

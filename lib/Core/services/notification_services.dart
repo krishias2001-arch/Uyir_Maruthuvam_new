@@ -26,7 +26,7 @@ class NotificationService {
       await _firestore.collection('notifications').add({
         'userId': doctorId,
         'title': 'New Appointment',
-        'body': 'Patient $patientName booked an appointment for ${_formatDate(appointmentDate)} at $appointmentTime',
+        'body': 'patient $patientName booked an appointment for ${_formatDate(appointmentDate)} at $appointmentTime',
         'timestamp': Timestamp.now(),
         'isRead': false,
         'type': 'appointment_booking',

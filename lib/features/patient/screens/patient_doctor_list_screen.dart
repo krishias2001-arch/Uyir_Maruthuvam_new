@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:uyir_maruthuvam_new/features/patient/patient_view_doctor_screen.dart';
+import 'package:uyir_maruthuvam_new/features/patient/screens/patient_view_doctor_screen.dart';
 
 
 

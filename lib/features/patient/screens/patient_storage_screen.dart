@@ -50,7 +50,7 @@ class _PatientStorageScreenState extends State<PatientStorageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Patient Storage"),
+        title: const Text("patient Storage"),
       ),
 
       body: Padding(

@@ -54,11 +54,11 @@ class AppointmentTable extends StatelessWidget {
                   .doc(patientId)
                   .get(),
               builder: (context, patientSnapshot) {
-                String patientName = 'Unknown Patient';
+                String patientName = 'Unknown patient';
                 
                 if (patientSnapshot.hasData && patientSnapshot.data!.exists) {
                   var patientData = patientSnapshot.data!.data() as Map<String, dynamic>?;
-                  patientName = patientData?['name'] ?? 'Unknown Patient';
+                  patientName = patientData?['name'] ?? 'Unknown patient';
                 }
 
                 return Card(
