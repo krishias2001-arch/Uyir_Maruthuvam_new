@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uyir_maruthuvam_new/features/patient/screens/patient_view_doctor_screen.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 
 class DoctorSearchScreen extends StatefulWidget {
@@ -18,7 +18,9 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     final l10n = AppLocalizations.of(context)!;
+    final userId = FirebaseAuth.instance.currentUser!.uid;
     
     final List<String> categories = [
       l10n.all,
@@ -101,79 +103,277 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
 
           /// 📋 DOCTOR LIST
           Expanded(
-            child: StreamBuilder(
+            child: StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('users')
-                  .where('role', isEqualTo: 'doctor')
-                  .where('profileCompleted', isEqualTo: true)
+                  .doc(userId)
                   .snapshots(),
-              builder: (context, snapshot) {
-
-                if (!snapshot.hasData) {
+              builder: (context, userSnapshot) {
+                if (!userSnapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                var doctors = snapshot.data!.docs;
+                final data = userSnapshot.data!.data() as Map<String, dynamic>?;
+                List<String> favorites = List<String>.from(data?['favorites'] ?? []);
 
-                /// 🔍 FILTER LOGIC
-                var filteredDoctors = doctors.where((doc) {
-                  var data = doc.data() as Map<String, dynamic>;
+                return StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .where('role', isEqualTo: 'doctor')
+                        .where('profileCompleted', isEqualTo: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                  String name = (data['name'] ?? '').toLowerCase();
-                  String specialization = (data['specialization'] ?? '').toLowerCase();
+                      var doctors = snapshot.data!.docs;
 
-                  bool matchesSearch = name.contains(searchQuery) ||
-                      specialization.contains(searchQuery);
+                      /// 🔍 FILTER LOGIC
+                      var filteredDoctors = doctors.where((doc) {
+                        var data = doc.data() as Map<String, dynamic>;
 
-                  bool matchesCategory = selectedCategory == l10n.all ||
-                      specialization.contains(selectedCategory.toLowerCase());
+                        String name = (data['name'] ?? '').toLowerCase();
+                        String specialization = (data['specialization'] ?? '')
+                            .toLowerCase();
 
-                  return matchesSearch && matchesCategory;
-                }).toList();
+                        bool matchesSearch = name.contains(searchQuery) ||
+                            specialization.contains(searchQuery);
 
-                if (filteredDoctors.isEmpty) {
-                  return Center(child: Text(l10n.noDoctorsFound));
-                }
+                        bool matchesCategory = selectedCategory == l10n.all ||
+                            specialization.contains(
+                                selectedCategory.toLowerCase());
 
-                return ListView.builder(
-                  itemCount: filteredDoctors.length,
-                  itemBuilder: (context, index) {
+                        return matchesSearch && matchesCategory;
+                      }).toList();
 
-                    var doctor = filteredDoctors[index];
-                    var data = doctor.data() as Map<String, dynamic>;
+                      if (filteredDoctors.isEmpty) {
+                        return Center(child: Text(l10n.noDoctorsFound));
+                      }
 
-                    String doctorId = doctor.id;
-                    String name = data['name'] ?? 'Unknown';
-                    String specialization = data['specialization'] ?? 'General';
+                      return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: filteredDoctors.length,
+                          itemBuilder: (context, index) {
+                            var doctor = filteredDoctors[index];
+                            var data = doctor.data() as Map<String, dynamic>;
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.person),
-                        ),
-                        title: Text(name),
-                        subtitle: Text(specialization),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PatientViewDoctorScreen(
-                                doctorId: doctorId,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                            String doctorId = doctor.id;
+                            String name = data['name'] ?? 'Unknown';
+                            String specialization = data['specialization'] ??
+                                'General';
+                            String imageUrl = data['imageUrl'] ?? '';
+                            bool isFavorite = favorites.contains(doctorId);
+
+                            return Container(
+                                height: 320,
+                                width: 200,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 15,
+                                  vertical: 20,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      spreadRadius: 2,
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PatientViewDoctorScreen(
+                                                      doctorId: doctorId,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                          child: ClipRRect(
+                                            borderRadius: const BorderRadius
+                                                .only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                            child: Container(
+                                              height: 160,
+                                              width: 200,
+                                              color: Colors.grey[300],
+                                              child: imageUrl.isNotEmpty
+                                                  ? Image.network(
+                                                imageUrl,
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                              )
+                                                  : const Icon(
+                                                Icons.person,
+                                                size: 50,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 8,
+                                          right: 8,
+                                          child: Container(
+                                            margin: const EdgeInsets.all(8),
+                                            height: 35,
+                                            width: 35,
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black12,
+                                                  spreadRadius: 2,
+                                                  blurRadius: 4,
+                                                ),
+                                              ],
+                                            ),
+                                            child: GestureDetector(
+                                              onTap: () async {
+                                                final userRef = FirebaseFirestore
+                                                    .instance
+                                                    .collection('users')
+                                                    .doc(userId);
+
+                                                if (isFavorite) {
+                                                  await userRef.update({
+                                                    'favorites': FieldValue
+                                                        .arrayRemove([doctorId])
+                                                  });
+                                                } else {
+                                                  await userRef.update({
+                                                    'favorites': FieldValue
+                                                        .arrayUnion([doctorId])
+                                                  });
+                                                }
+                                              },
+                                              child: Icon(
+                                                isFavorite
+                                                    ? Icons.favorite
+                                                    : Icons.favorite_border,
+                                                color: Colors.redAccent,
+                                                size: 18,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .start,
+                                        children: [
+                                          Text(
+                                            name,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black.withOpacity(
+                                                  0.8),
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            specialization,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black.withOpacity(
+                                                  0.6),
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.star,
+                                                  color: Colors.amber,
+                                                  size: 16),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                "4.9",
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.black
+                                                      .withOpacity(0.6),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: SizedBox(
+                                        height: 35,
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PatientViewDoctorScreen(
+                                                        doctorId: doctorId),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.redAccent,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius
+                                                  .circular(8),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8),
+                                          ),
+                                          child: Text(
+                                            l10n.bookAppointment,
+                                            style: const TextStyle(
+                                                fontSize: 12),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+
+                            );
+                          }
+                      );
+                    }
                 );
-              },
-            ),
-          ),
-        ],
-      ),
+              }
+                  )
+                  )
+                  ]
+                  )
+
+
     );
   }
 

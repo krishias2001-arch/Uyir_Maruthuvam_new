@@ -7,11 +7,11 @@ import 'dart:io';
 import 'package:uyir_maruthuvam_new/features/patient/screens/patient_view_doctor_screen.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 import '../../../core/services/notification_services.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 class PatientHomeScreen extends StatefulWidget {
 
 
-  PatientHomeScreen({super.key, });
+  const PatientHomeScreen({super.key, });
 
   @override
   State<PatientHomeScreen> createState() => _PatientHomeScreenState();
@@ -19,9 +19,9 @@ class PatientHomeScreen extends StatefulWidget {
 
 class _PatientHomeScreenState extends State<PatientHomeScreen> {
   File? _imageFile;
-  String? imageUrl;
   Future<PatientModel?>? _patientFuture;
   final NotificationService _notificationService = NotificationService();
+  String? imageUrl;
   @override
   void initState() {
     super.initState();
@@ -35,7 +35,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
+    final userId = FirebaseAuth.instance.currentUser!.uid;
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 30),
@@ -52,14 +52,14 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                   child: Row(
                     children: [
                        CircleAvatar(
-                        radius: 30,
+                        radius: 25,
                         backgroundColor: Colors.redAccent,
                         backgroundImage: _imageFile != null
                             ? FileImage(_imageFile!)
-                            : (imageUrl != null && imageUrl!.isNotEmpty
+                            : (imageUrl?.isNotEmpty == true
                             ? NetworkImage(imageUrl!) as ImageProvider
                             : null),
-                        child: (_imageFile == null && (imageUrl == null || imageUrl!.isEmpty))
+                        child: imageUrl?.isEmpty == true
                             ? const Icon(Icons.person, size: 50, color: Colors.white)
                             : null,
                       ),
@@ -187,192 +187,233 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
           ),
           SizedBox(
             height: 360,
-            child: StreamBuilder(
+            child: StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('users')
-                  .where('role', isEqualTo: 'doctor')
-                  .where('profileCompleted', isEqualTo: true)
+                  .doc(userId)
                   .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+              builder: (context, userSnapshot) {
+                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                var doctors = snapshot.data!.docs;
+                final data = userSnapshot.data!.data() as Map<String, dynamic>?;
+                List favorites = data?['favorites'] ?? [];
 
-                if (doctors.isEmpty) {
-                  return Center(
-                    child: Text(
-                      l10n.noDoctorsAvailable,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  );
-                }
+                return StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .where('role', isEqualTo: 'doctor')
+                      .where('profileCompleted', isEqualTo: true)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                return ListView.builder(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: doctors.length,
-                  itemBuilder: (context, index) {
-                    var doctorData = doctors[index].data() as Map<String, dynamic>;
-                    String doctorId = doctors[index].id;
-                    String doctorName = doctorData['name'] ?? 'Unknown Doctor';
-                    String specialization = doctorData['specialization'] ?? 'General';
-                    String? imageUrl = doctorData['imageUrl'];
-                    return Container(
-                      height: 320,
-                      width: 200,
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 20,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            spreadRadius: 2,
-                            blurRadius: 2,
+                    var doctors = snapshot.data!.docs;
+                    var favoriteDoctors = doctors.where((doc) {
+                      return favorites.contains(doc.id);
+                    }).toList();
+                    
+                    if (favoriteDoctors.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "No favorite doctors yet",
+                          style: TextStyle(
+                            color: Colors.black.withOpacity(0.6),
+                            fontSize: 16,
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Stack(
-                            children: [
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PatientViewDoctorScreen(
-                                          doctorId: doctorId,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                    child: Container(
-                                      height: 160,
-                                      width: 200,
-                                      color: Colors.grey[300],
+                        ),
+                      );
+                    }
 
-                                  child: (imageUrl != null && imageUrl.isNotEmpty)
-                                      ? Image.network(
-                                    imageUrl,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  )
-                                      : const Icon(
-                                    Icons.person,
-                                    size: 20,
-                                    color: Colors.grey,
-                                  ),
-                                    ),
-                                  ),
-                                ),
-                                Align(
-                                  alignment: Alignment.topRight,
-                                  child: Container(
-                                    margin: const EdgeInsets.all(8),
-                                    height: 45,
-                                    width: 45,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black12,
-                                          spreadRadius: 2,
-                                          blurRadius: 4,
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.favorite_outline,
-                                      color: Colors.redAccent,
-                                      size: 25,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: favoriteDoctors.length,
+                      itemBuilder: (context, index) {
+                        var doctorData = favoriteDoctors[index].data() as Map<String, dynamic>;
+                        String doctorId = favoriteDoctors[index].id;
+                        String doctorName = doctorData['name'] ?? 'Unknown Doctor';
+                        String specialization = doctorData['specialization'] ?? 'General';
+                        String doctorImageUrl = doctorData['imageUrl'] ?? '';
+                        
+                        return Container(
+                          height: 320,
+                          width: 200,
+                          margin: const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black12,
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Stack(
                                 children: [
-                                  Text(
-                                    doctorName,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black.withOpacity(0.6),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    specialization,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black.withOpacity(0.6),
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.star, color: Colors.amber),
-                                      const SizedBox(width: 5),
-                                      Text(
-                                        "4.9",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black.withOpacity(0.6),
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PatientViewDoctorScreen(
+                                            doctorId: doctorId,
+                                          ),
                                         ),
+                                      );
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(15),
+                                        topRight: Radius.circular(15),
                                       ),
-                                    ],
+                                      child: Container(
+                                        height: 160,
+                                        width: 200,
+                                        color: Colors.grey[300],
+                                        child: doctorImageUrl.isNotEmpty
+                                            ? Image.network(
+                                                doctorImageUrl,
+                                                fit: BoxFit.cover,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                              )
+                                            : const Icon(
+                                                Icons.person,
+                                                size: 50,
+                                                color: Colors.grey,
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Container(
+                                      height: 35,
+                                      width: 35,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black12,
+                                            spreadRadius: 2,
+                                            blurRadius: 4,
+                                          ),
+                                        ],
+                                      ),
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.favorite,
+                                          color: Colors.redAccent,
+                                          size: 18,
+                                        ),
+                                        onPressed: () async {
+                                          final userRef = FirebaseFirestore.instance
+                                              .collection('users')
+                                              .doc(userId);
+
+                                          try {
+                                            await userRef.update({
+                                              'favorites': FieldValue.arrayRemove([doctorId])
+                                            });
+                                          } catch (e) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text("Failed to remove favorite")),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            SizedBox(
-                              height: 50,
-                              child: Center(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                                PatientViewDoctorScreen(doctorId: doctorId),
+                              const SizedBox(height: 8),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      doctorName,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black.withOpacity(0.8),
                                       ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.redAccent,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                  child: Text(l10n.bookAppointment),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      specialization,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black.withOpacity(0.6),
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          "4.9",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black.withOpacity(0.6),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
+                              const Spacer(),
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: SizedBox(
+                                  height: 35,
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PatientViewDoctorScreen(doctorId: doctorId),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.redAccent,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    ),
+                                    child: Text(
+                                      l10n.bookAppointment,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
                 );
@@ -381,7 +422,8 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
           ),
         ],
       ),
-    )
+      )
     );
+      }
   }
-}
+
