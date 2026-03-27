@@ -238,7 +238,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                         String doctorName = doctorData['name'] ?? 'Unknown Doctor';
                         String specialization = doctorData['specialization'] ?? 'General';
                         String doctorImageUrl = doctorData['imageUrl'] ?? '';
-                        
+                        double rating = (doctorData['rating'] ?? 0).toDouble();
                         return Container(
                           height: 320,
                           width: 200,
@@ -369,7 +369,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                                         const Icon(Icons.star, color: Colors.amber, size: 16),
                                         const SizedBox(width: 4),
                                         Text(
-                                          "4.9",
+                                          rating == 0 ? "0.0" : rating.toStringAsFixed(1),
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: Colors.black.withOpacity(0.6),

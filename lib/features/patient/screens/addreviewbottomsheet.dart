@@ -39,6 +39,29 @@ class _AddReviewBottomSheetState extends State<AddReviewBottomSheet> {
       'comment': commentController.text, // ✅ correct
       'timestamp': FieldValue.serverTimestamp(),
     });
+    final reviewsRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.doctorId)
+        .collection('reviews');
+
+// get all reviews
+    final snapshot = await reviewsRef.get();
+
+    double total = 0;
+    for (var doc in snapshot.docs) {
+      total += (doc['rating'] as num).toDouble();
+    }
+
+    double avg = snapshot.docs.isEmpty ? 0 : total / snapshot.docs.length;
+
+// update doctor document
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.doctorId)
+        .update({
+      'rating': avg,
+      'reviewCount': snapshot.docs.length,
+    });
 
     Navigator.pop(context);
   }

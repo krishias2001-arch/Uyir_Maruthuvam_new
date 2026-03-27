@@ -164,6 +164,7 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
                                 'General';
                             String imageUrl = data['imageUrl'] ?? '';
                             bool isFavorite = favorites.contains(doctorId);
+                            double rating = (data['rating'] ?? 0).toDouble();
 
                             return Container(
                                 height: 320,
@@ -312,11 +313,10 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
                                                   size: 16),
                                               const SizedBox(width: 4),
                                               Text(
-                                                "4.9",
+                                                rating == 0 ? "0.0" : rating.toStringAsFixed(1),
                                                 style: TextStyle(
                                                   fontSize: 14,
-                                                  color: Colors.black
-                                                      .withOpacity(0.6),
+                                                  color: Colors.black.withOpacity(0.6),
                                                 ),
                                               ),
                                             ],
