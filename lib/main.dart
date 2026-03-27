@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:uyir_maruthuvam_new/core/widgets/restartwidget.dart';
 
 import 'package:uyir_maruthuvam_new/features/auth/auth_gate.dart';
 import 'package:uyir_maruthuvam_new/core/services/notification_services.dart';
 import 'package:uyir_maruthuvam_new/features/auth/screens/welcome_screen.dart';
+import 'package:uyir_maruthuvam_new/providers/favorites_provider.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -16,13 +18,9 @@ import 'l10n/app_localizations.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    debugPrint("Initialization error: $e");
-  }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   await NotificationService().init();
 
@@ -38,9 +36,17 @@ Future<void> main() async {
 
   // ✅ PASS provider to app
   runApp(
-    ChangeNotifierProvider.value(
-      value: localeProvider,
-      child: const MyApp(),
+    RestartWidget(
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: localeProvider),
+
+          ChangeNotifierProvider(
+            create: (_) => FavoritesProvider()..startListening(),
+          ),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uyir_maruthuvam_new/core/services/patient_services.dart';
+import 'package:provider/provider.dart';
+import 'package:uyir_maruthuvam_new/core/services/patient_service.dart';
 import 'package:uyir_maruthuvam_new/data/models/patient_model.dart';
 import 'package:uyir_maruthuvam_new/features/appointments/screens/notification_screen.dart';
 import 'dart:io';
 import 'package:uyir_maruthuvam_new/features/patient/screens/patient_view_doctor_screen.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
+import 'package:uyir_maruthuvam_new/providers/favorites_provider.dart';
 import '../../../core/services/notification_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 class PatientHomeScreen extends StatefulWidget {
 
 
@@ -21,6 +24,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
   File? _imageFile;
   Future<PatientModel?>? _patientFuture;
   final NotificationService _notificationService = NotificationService();
+
   String? imageUrl;
   @override
   void initState() {
@@ -36,13 +40,16 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final userId = FirebaseAuth.instance.currentUser!.uid;
+    final provider = Provider.of<FavoritesProvider>(context);
+    final favoriteIds = provider.favoriteIds.toList();
+
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(top: 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Padding(
+           Padding(
             padding: const EdgeInsets.only(top: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,25 +194,13 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
           ),
           SizedBox(
             height: 360,
-            child: StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance
+            child:  StreamBuilder<QuerySnapshot>(
+              stream: favoriteIds.isEmpty
+                  ? null
+                  : FirebaseFirestore.instance
                   .collection('users')
-                  .doc(userId)
+                  .where(FieldPath.documentId, whereIn: favoriteIds)
                   .snapshots(),
-              builder: (context, userSnapshot) {
-                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final data = userSnapshot.data!.data() as Map<String, dynamic>?;
-                List favorites = data?['favorites'] ?? [];
-
-                return StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .where('role', isEqualTo: 'doctor')
-                      .where('profileCompleted', isEqualTo: true)
-                      .snapshots(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
@@ -213,7 +208,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
 
                     var doctors = snapshot.data!.docs;
                     var favoriteDoctors = doctors.where((doc) {
-                      return favorites.contains(doc.id);
+                      return provider.isFavorite(doc.id);
                     }).toList();
                     
                     if (favoriteDoctors.isEmpty) {
@@ -239,6 +234,7 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                         String specialization = doctorData['specialization'] ?? 'General';
                         String doctorImageUrl = doctorData['imageUrl'] ?? '';
                         double rating = (doctorData['rating'] ?? 0).toDouble();
+                        bool isFavorite = provider.isFavorite(doctorId);
                         return Container(
                           height: 320,
                           width: 200,
@@ -312,20 +308,14 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                                         ],
                                       ),
                                       child: IconButton(
-                                        icon: const Icon(
-                                          Icons.favorite,
+                                        icon: Icon(
+                                          isFavorite ? Icons.favorite : Icons.favorite_border,
                                           color: Colors.redAccent,
                                           size: 18,
                                         ),
                                         onPressed: () async {
-                                          final userRef = FirebaseFirestore.instance
-                                              .collection('users')
-                                              .doc(userId);
-
                                           try {
-                                            await userRef.update({
-                                              'favorites': FieldValue.arrayRemove([doctorId])
-                                            });
+                                            await provider.toggleFavorite(doctorId);
                                           } catch (e) {
                                             ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(content: Text("Failed to remove favorite")),
@@ -416,14 +406,13 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
                       },
                     );
                   },
-                );
-              },
-            ),
-          ),
-        ],
+            )
+          )
+        ]
       ),
       )
     );
-      }
+  }
+
   }
 

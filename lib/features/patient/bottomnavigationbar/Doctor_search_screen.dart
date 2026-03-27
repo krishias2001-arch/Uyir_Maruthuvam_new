@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'package:uyir_maruthuvam_new/features/patient/screens/patient_view_doctor_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
+import 'package:uyir_maruthuvam_new/providers/favorites_provider.dart';
 
 class DoctorSearchScreen extends StatefulWidget {
   const DoctorSearchScreen({super.key});
@@ -21,7 +23,8 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
 
     final l10n = AppLocalizations.of(context)!;
     final userId = FirebaseAuth.instance.currentUser!.uid;
-    
+    final provider = Provider.of<FavoritesProvider>(context);
+
     final List<String> categories = [
       l10n.all,
       l10n.dental,
@@ -103,20 +106,7 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
 
           /// 📋 DOCTOR LIST
           Expanded(
-            child: StreamBuilder<DocumentSnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(userId)
-                  .snapshots(),
-              builder: (context, userSnapshot) {
-                if (!userSnapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final data = userSnapshot.data!.data() as Map<String, dynamic>?;
-                List<String> favorites = List<String>.from(data?['favorites'] ?? []);
-
-                return StreamBuilder(
+            child: StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection('users')
                         .where('role', isEqualTo: 'doctor')
@@ -163,7 +153,7 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
                             String specialization = data['specialization'] ??
                                 'General';
                             String imageUrl = data['imageUrl'] ?? '';
-                            bool isFavorite = favorites.contains(doctorId);
+                            bool isFavorite = provider.isFavorite(doctorId);
                             double rating = (data['rating'] ?? 0).toDouble();
 
                             return Container(
@@ -246,21 +236,12 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
                                             ),
                                             child: GestureDetector(
                                               onTap: () async {
-                                                final userRef = FirebaseFirestore
-                                                    .instance
-                                                    .collection('users')
-                                                    .doc(userId);
-
-                                                if (isFavorite) {
-                                                  await userRef.update({
-                                                    'favorites': FieldValue
-                                                        .arrayRemove([doctorId])
-                                                  });
-                                                } else {
-                                                  await userRef.update({
-                                                    'favorites': FieldValue
-                                                        .arrayUnion([doctorId])
-                                                  });
+                                                try {
+                                                  await provider.toggleFavorite(doctorId);
+                                                } catch (e) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text("Failed to update favorite")),
+                                                  );
                                                 }
                                               },
                                               child: Icon(
@@ -366,14 +347,10 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
                           }
                       );
                     }
-                );
-              }
-                  )
+                )
                   )
                   ]
                   )
-
-
     );
   }
 

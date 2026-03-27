@@ -12,6 +12,21 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AuthGate(),
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

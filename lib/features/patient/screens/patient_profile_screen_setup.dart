@@ -3,7 +3,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:uyir_maruthuvam_new/core/services/patient_services.dart';
+import 'package:uyir_maruthuvam_new/core/services/patient_service.dart';
 import 'package:uyir_maruthuvam_new/data/models/patient_model.dart';
 
 
