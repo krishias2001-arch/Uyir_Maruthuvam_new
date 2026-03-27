@@ -9,7 +9,6 @@ import 'package:uyir_maruthuvam_new/features/patient/screens/patient_view_doctor
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 import 'package:uyir_maruthuvam_new/providers/favorites_provider.dart';
 import '../../../core/services/notification_services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class PatientHomeScreen extends StatefulWidget {
 
@@ -39,7 +38,6 @@ class _PatientHomeScreenState extends State<PatientHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final userId = FirebaseAuth.instance.currentUser!.uid;
     final provider = Provider.of<FavoritesProvider>(context);
     final favoriteIds = provider.favoriteIds.toList();
 

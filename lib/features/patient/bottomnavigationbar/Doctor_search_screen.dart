@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:uyir_maruthuvam_new/features/patient/screens/patient_view_doctor_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uyir_maruthuvam_new/l10n/app_localizations.dart';
 import 'package:uyir_maruthuvam_new/providers/favorites_provider.dart';
 
@@ -22,7 +21,6 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
   Widget build(BuildContext context) {
 
     final l10n = AppLocalizations.of(context)!;
-    final userId = FirebaseAuth.instance.currentUser!.uid;
     final provider = Provider.of<FavoritesProvider>(context);
 
     final List<String> categories = [
@@ -121,7 +119,7 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
 
                       /// 🔍 FILTER LOGIC
                       var filteredDoctors = doctors.where((doc) {
-                        var data = doc.data() as Map<String, dynamic>;
+                        var data = doc.data();
 
                         String name = (data['name'] ?? '').toLowerCase();
                         String specialization = (data['specialization'] ?? '')
@@ -146,7 +144,7 @@ class _DoctorSearchScreenState extends State<DoctorSearchScreen> {
                           itemCount: filteredDoctors.length,
                           itemBuilder: (context, index) {
                             var doctor = filteredDoctors[index];
-                            var data = doctor.data() as Map<String, dynamic>;
+                            var data = doctor.data();
 
                             String doctorId = doctor.id;
                             String name = data['name'] ?? 'Unknown';
